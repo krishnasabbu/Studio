@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Admin",
+    "description": "Full access to all features and settings",
+    "permissions": ["create", "read", "update", "delete"],
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "2",
+    "name": "Editor",
+    "description": "Can create, read, and update templates but cannot delete",
+    "permissions": ["create", "read", "update"],
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "3",
+    "name": "Viewer",
+    "description": "Read-only access to templates and reports",
+    "permissions": ["read"],
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+]

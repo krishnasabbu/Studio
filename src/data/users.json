@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "username": "admin",
+    "email": "admin@company.com",
+    "role": "Admin",
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "2",
+    "username": "editor",
+    "email": "editor@company.com",
+    "role": "Editor",
+    "status": "active",
+    "createdAt": "2024-01-02T00:00:00Z"
+  },
+  {
+    "id": "3",
+    "username": "viewer",
+    "email": "viewer@company.com",
+    "role": "Viewer",
+    "status": "active",
+    "createdAt": "2024-01-03T00:00:00Z"
+  },
+  {
+    "id": "4",
+    "username": "john.doe",
+    "email": "john.doe@company.com",
+    "role": "Editor",
+    "status": "active",
+    "createdAt": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": "5",
+    "username": "jane.smith",
+    "email": "jane.smith@company.com",
+    "role": "Viewer",
+    "status": "inactive",
+    "createdAt": "2024-01-20T14:15:00Z"
+  }
+]

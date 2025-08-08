@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "messageType": "6333",
+    "messageName": "Zelle Add Payment Recipient",
+    "run": true,
+    "runType": "Functional",
+    "status": "Passed",
+    "reportUrl": "/reports/zelle-payment-test.pdf",
+    "initiatedBy": "john.doe@company.com",
+    "lastRunDate": "2024-01-15T16:45:00Z"
+  },
+  {
+    "id": "2",
+    "messageType": "7445",
+    "messageName": "Account Security Alert",
+    "run": true,
+    "runType": "UAT",
+    "status": "InProgress",
+    "reportUrl": "/reports/security-alert-test.pdf",
+    "initiatedBy": "jane.smith@company.com",
+    "lastRunDate": "2024-01-16T10:30:00Z"
+  },
+  {
+    "id": "3",
+    "messageType": "8901",
+    "messageName": "Weekly Promotion Alert",
+    "run": false,
+    "runType": "Functional",
+    "status": "Failed",
+    "reportUrl": "/reports/promotion-alert-test.pdf",
+    "initiatedBy": "mike.johnson@company.com",
+    "lastRunDate": "2024-01-17T14:20:00Z"
+  },
+  {
+    "id": "4",
+    "messageType": "5566",
+    "messageName": "Transaction Confirmation",
+    "run": true,
+    "runType": "Functional",
+    "status": "Passed",
+    "reportUrl": "/reports/transaction-confirmation-test.pdf",
+    "initiatedBy": "admin@company.com",
+    "lastRunDate": "2024-01-18T13:30:00Z"
+  }
+]

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CKEditor base height */
+.ck-editor__editable_inline {
+  min-height: 120px;
+}
+
+/* Optional: dark theme tweaks */
+.dark .ck.ck-toolbar,
+.dark .ck.ck-content {
+  background: #374151;
+}
+.dark .ck.ck-toolbar {
+  border-color: #4b5563;
+}
+.dark .ck.ck-content {
+  color: #ffffff;
+}

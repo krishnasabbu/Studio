@@ -1,0 +1,623 @@
+{
+  "templates": [
+    {
+      "id": "1",
+      "messageTypeId": "6333",
+      "messageName": "Zelle Add Payment Recipient",
+      "channels": [
+        "External Email",
+        "Secure Inbox"
+      ],
+      "language": "English",
+      "type": "Email",
+      "status": "active",
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z",
+      "widgets": [
+        {
+          "id": "widget-1",
+          "type": "HeaderWidget",
+          "components": [
+            {
+              "id": "comp-1",
+              "type": "Subject",
+              "content": "Payment Recipient Added Successfully",
+              "properties": {
+                "fontSize": "16px",
+                "fontWeight": "bold"
+              },
+              "order": 0
+            }
+          ],
+          "order": 0
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "messageTypeId": "7445",
+      "messageName": "Account Security Alert",
+      "channels": [
+        "External Email",
+        "Push"
+      ],
+      "language": "English",
+      "type": "Email",
+      "status": "active",
+      "createdAt": "2024-01-16T14:30:00Z",
+      "updatedAt": "2024-01-16T14:30:00Z",
+      "widgets": []
+    },
+    {
+      "id": "3",
+      "messageTypeId": "8901",
+      "messageName": "Weekly Promotion Alert",
+      "channels": [
+        "Push",
+        "SMS"
+      ],
+      "language": "Spanish",
+      "type": "Push",
+      "status": "draft",
+      "createdAt": "2024-01-17T09:15:00Z",
+      "updatedAt": "2024-01-17T09:15:00Z",
+      "widgets": []
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "email": "admin@company.com",
+      "role": "Admin",
+      "status": "active",
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "username": "editor",
+      "email": "editor@company.com",
+      "role": "Editor",
+      "status": "active",
+      "createdAt": "2024-01-02T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "username": "viewer",
+      "email": "viewer@company.com",
+      "role": "Viewer",
+      "status": "active",
+      "createdAt": "2024-01-03T00:00:00Z"
+    },
+    {
+      "id": "1753248061173",
+      "username": "sabbu",
+      "email": "sabbu@gmail.com",
+      "role": "Admin",
+      "status": "active",
+      "createdAt": "2025-07-23T05:21:01.173Z"
+    }
+  ],
+  "roles": [
+    {
+      "id": "1",
+      "name": "Admin",
+      "description": "Full access to all features and settings",
+      "permissions": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Editor",
+      "description": "Can create, read, and update templates but cannot delete",
+      "permissions": [
+        "create",
+        "read",
+        "update"
+      ],
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Viewer",
+      "description": "Read-only access to templates and reports",
+      "permissions": [
+        "read"
+      ],
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "tests": [
+    {
+      "id": "1",
+      "messageType": "6333",
+      "messageName": "Zelle Add Payment Recipient",
+      "run": true,
+      "runType": "Functional",
+      "status": "Passed",
+      "reportUrl": "/reports/zelle-payment-test.pdf",
+      "initiatedBy": "john.doe@company.com",
+      "lastRunDate": "2024-01-15T16:45:00Z"
+    }
+  ],
+  "onboard": [
+    {
+      "id": "1",
+      "name": "High CPU Alert",
+      "jiraId": "PROJ-1234",
+      "status": "Draft",
+      "fields": {
+        "field1": "Alert Type: Security",
+        "field2": "Priority: High",
+        "field3": "Category: Authentication"
+      },
+      "selectedTemplates": [
+        "1",
+        "2"
+      ],
+      "selectedFeatures": [
+        "Email Notifications",
+        "Push Notifications"
+      ],
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Memory Usage Alert",
+      "jiraId": "PROJ-5678",
+      "status": "Published",
+      "fields": {
+        "field1": "Alert Type: Performance",
+        "field2": "Priority: Medium",
+        "field3": "Category: System",
+        "field4": "Severity: Warning",
+        "field5": "Department: DevOps",
+        "field6": "Escalation Level: 1",
+        "field7": "Response Time: 30 minutes",
+        "field8": "Notification Frequency: Every 15 minutes",
+        "field9": "Target Audience: DevOps Team",
+        "field10": "Compliance Required: No"
+      },
+      "selectedTemplates": [
+        "3"
+      ],
+      "selectedFeatures": [
+        "SMS Alerts",
+        "Webhook Integration"
+      ],
+      "createdAt": "2024-01-18T14:30:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Database Connection Alert",
+      "jiraId": "PROJ-9012",
+      "status": "Draft",
+      "fields": {
+        "field1": "Alert Type: Database",
+        "field2": "Priority: Critical",
+        "field3": "Category: Infrastructure",
+        "field4": "Severity: High",
+        "field5": "Department: Database Team",
+        "field6": "Escalation Level: 3",
+        "field7": "Response Time: 5 minutes",
+        "field8": "Notification Frequency: Immediate",
+        "field9": "Target Audience: All Engineers",
+        "field10": "Compliance Required: Yes"
+      },
+      "selectedTemplates": [
+        "1",
+        "4"
+      ],
+      "selectedFeatures": [
+        "Email Notifications",
+        "Push Notifications",
+        "SMS Alerts"
+      ],
+      "createdAt": "2024-01-22T09:15:00Z"
+    }
+  ],
+  "jiraData": [
+    {
+      "jiraId": "PROJ-1234",
+      "data": {
+        "field1": "Alert Type: Security",
+        "field2": "Priority: High",
+        "field3": "Category: Authentication",
+        "field4": "Severity: Critical",
+        "field5": "Department: IT Security",
+        "field6": "Escalation Level: 2",
+        "field7": "Response Time: 15 minutes",
+        "field8": "Notification Frequency: Immediate",
+        "field9": "Target Audience: All Users",
+        "field10": "Compliance Required: Yes"
+      },
+      "id": "3a4f"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Credit Card",
+      "description": "Credit card notifications and alerts",
+      "icon": "CreditCard",
+      "alertCount": 12,
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "name": "Debit Card",
+      "description": "Debit card transaction notifications",
+      "icon": "CreditCard",
+      "alertCount": 8,
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "name": "Loan",
+      "description": "Loan application and payment alerts",
+      "icon": "DollarSign",
+      "alertCount": 15,
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "name": "UPI",
+      "description": "UPI payment notifications",
+      "icon": "Smartphone",
+      "alertCount": 20,
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "name": "Insurance",
+      "description": "Insurance policy and claim notifications",
+      "icon": "Shield",
+      "alertCount": 10,
+      "status": "active"
+    }
+  ],
+  "testRuns": [
+    {
+      "id": "1",
+      "product": "Credit Card",
+      "environment": "DEV",
+      "mode": "Normal",
+      "selectedAlerts": [
+        "1",
+        "2"
+      ],
+      "status": "completed",
+      "result": "success",
+      "executedAt": "2024-01-20T10:30:00Z"
+    },
+    {
+      "id": "1753209480184",
+      "product": "Credit Card",
+      "productId": "1",
+      "environment": "DEV",
+      "mode": "Normal",
+      "selectedAlerts": [
+        "1",
+        "2"
+      ],
+      "status": "completed",
+      "result": "success",
+      "executedAt": "2025-07-22T18:38:00.184Z"
+    }
+  ],
+  "testHistory": [
+    {
+      "id": "1",
+      "messageType": "6333",
+      "messageName": "Zelle Add Payment Recipient",
+      "run": "#001",
+      "runType": "Functional",
+      "status": "Passed",
+      "reportUrl": "/reports/zelle-payment-test.pdf",
+      "initiatedBy": "john.doe@company.com",
+      "lastRunDate": "2024-01-15T16:45:00Z",
+      "product": "Credit Card",
+      "environment": "DEV",
+      "mode": "Normal",
+      "selectedAlerts": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "id": "2",
+      "messageType": "7445",
+      "messageName": "Account Security Alert",
+      "run": "#002",
+      "runType": "UAT",
+      "status": "InProgress",
+      "reportUrl": "/reports/security-alert-test.pdf",
+      "initiatedBy": "jane.smith@company.com",
+      "lastRunDate": "2024-01-16T10:30:00Z",
+      "product": "Debit Card",
+      "environment": "SIT",
+      "mode": "Regression",
+      "selectedAlerts": [
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "3",
+      "messageType": "8901",
+      "messageName": "Weekly Promotion Alert",
+      "run": "#003",
+      "runType": "Functional",
+      "status": "Failed",
+      "reportUrl": "/reports/promotion-alert-test.pdf",
+      "initiatedBy": "mike.johnson@company.com",
+      "lastRunDate": "2024-01-17T14:20:00Z",
+      "product": "UPI",
+      "environment": "RQA",
+      "mode": "Normal",
+      "selectedAlerts": [
+        "1",
+        "3"
+      ]
+    },
+    {
+      "id": "4",
+      "messageType": "5566",
+      "messageName": "Transaction Confirmation",
+      "run": "#004",
+      "runType": "Functional",
+      "status": "Passed",
+      "reportUrl": "/reports/transaction-confirmation-test.pdf",
+      "initiatedBy": "admin@company.com",
+      "lastRunDate": "2024-01-18T13:30:00Z",
+      "product": "Loan",
+      "environment": "DEV",
+      "mode": "Normal",
+      "selectedAlerts": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "5",
+      "messageType": "9988",
+      "messageName": "Insurance Policy Renewal",
+      "run": "#005",
+      "runType": "Regression",
+      "status": "Passed",
+      "reportUrl": "/reports/insurance-renewal-test.pdf",
+      "initiatedBy": "sarah.wilson@company.com",
+      "lastRunDate": "2024-01-19T11:15:00Z",
+      "product": "Insurance",
+      "environment": "SIT",
+      "mode": "Regression",
+      "selectedAlerts": [
+        "2",
+        "4"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "1",
+      "name": "Payment Processing Workflow",
+      "description": "Complete payment processing pipeline from dev to production",
+      "createdBy": "admin@company.com",
+      "version": "1.0",
+      "status": "active",
+      "createdAt": "2024-01-20T10:00:00Z",
+      "updatedAt": "2024-01-20T10:00:00Z",
+      "stages": [
+        {
+          "id": "stage-1",
+          "name": "Dev",
+          "order": 0,
+          "status": "pending",
+          "activities": [
+            {
+              "id": "activity-1",
+              "type": "Execute DB Query",
+              "name": "Initialize Payment Tables",
+              "order": 0,
+              "status": "pending",
+              "config": {
+                "query": "CREATE TABLE IF NOT EXISTS payments (id INT PRIMARY KEY, amount DECIMAL(10,2), status VARCHAR(50));",
+                "database": "dev_db"
+              }
+            },
+            {
+              "id": "activity-2",
+              "type": "Email Alert",
+              "name": "Dev Environment Ready",
+              "order": 1,
+              "status": "pending",
+              "config": {
+                "templateId": "1",
+                "recipients": ["dev-team@company.com"],
+                "subject": "Dev Environment Ready for Testing"
+              }
+            }
+          ]
+        },
+        {
+          "id": "stage-2",
+          "name": "RQA",
+          "order": 1,
+          "status": "pending",
+          "activities": [
+            {
+              "id": "activity-3",
+              "type": "Manual Approval",
+              "name": "QA Sign-off",
+              "order": 0,
+              "status": "pending",
+              "config": {
+                "approvers": ["qa-lead@company.com"],
+                "instructions": "Please verify all test cases pass before approval"
+              }
+            }
+          ]
+        },
+        {
+          "id": "stage-3",
+          "name": "Stage",
+          "order": 2,
+          "status": "pending",
+          "activities": [
+            {
+              "id": "activity-4",
+              "type": "Webhook Trigger",
+              "name": "Deploy to Staging",
+              "order": 0,
+              "status": "pending",
+              "config": {
+                "url": "https://api.staging.company.com/deploy",
+                "method": "POST",
+                "headers": {
+                  "Authorization": "Bearer staging-token"
+                },
+                "payload": {
+                  "environment": "staging",
+                  "version": "1.0"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "stage-4",
+          "name": "Prod",
+          "order": 3,
+          "status": "pending",
+          "activities": [
+            {
+              "id": "activity-5",
+              "type": "Manual Approval",
+              "name": "Production Deployment Approval",
+              "order": 0,
+              "status": "pending",
+              "config": {
+                "approvers": ["prod-manager@company.com", "cto@company.com"],
+                "instructions": "Final approval required for production deployment"
+              }
+            },
+            {
+              "id": "activity-6",
+              "type": "Webhook Trigger",
+              "name": "Deploy to Production",
+              "order": 1,
+              "status": "pending",
+              "config": {
+                "url": "https://api.prod.company.com/deploy",
+                "method": "POST",
+                "headers": {
+                  "Authorization": "Bearer prod-token"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "workflowExecutions": [
+    {
+      "id": "1",
+      "workflowId": "1",
+      "status": "running",
+      "currentStage": "stage-1",
+      "startedAt": "2024-01-20T14:30:00Z",
+      "startedBy": "admin@company.com",
+      "logs": [
+        {
+          "timestamp": "2024-01-20T14:30:00Z",
+          "stage": "stage-1",
+          "activity": "activity-1",
+          "status": "completed",
+          "message": "Database query executed successfully",
+          "details": "Created payments table in dev_db"
+        }
+      ]
+    }
+  ],
+  "activityTemplates": [
+    {
+      "id": "1",
+      "name": "Standard DB Migration",
+      "type": "Execute DB Query",
+      "description": "Template for database migration scripts",
+      "config": {
+        "query": "-- Add your migration script here\nALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+        "database": "{{environment}}_db"
+      }
+    },
+    {
+      "id": "2",
+      "name": "Deployment Notification",
+      "type": "Email Alert",
+      "description": "Standard deployment notification email",
+      "config": {
+        "templateId": "1",
+        "recipients": ["team@company.com"],
+        "subject": "Deployment to {{environment}} Complete"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1",
+      "releaseNumber": "R2024.01.001",
+      "title": "User Authentication Enhancement",
+      "description": "Add multi-factor authentication support",
+      "sqlQuery": "-- User Authentication Enhancement\nALTER TABLE users ADD COLUMN mfa_enabled BOOLEAN DEFAULT FALSE;\nALTER TABLE users ADD COLUMN mfa_secret VARCHAR(255);\nCREATE INDEX idx_users_mfa ON users(mfa_enabled);",
+      "status": "pending",
+      "assignedWorkflow": "1",
+      "createdBy": "admin@company.com",
+      "createdAt": "2024-01-20T10:00:00Z",
+      "updatedAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "releaseNumber": "R2024.01.002",
+      "title": "Performance Optimization",
+      "description": "Optimize database queries for better performance",
+      "sqlQuery": "-- Performance Optimization\nCREATE INDEX idx_orders_created_at ON orders(created_at);\nCREATE INDEX idx_users_email ON users(email);\nANALYZE TABLE orders;\nANALYZE TABLE users;",
+      "status": "in_progress",
+      "assignedWorkflow": "1",
+      "createdBy": "developer@company.com",
+      "createdAt": "2024-01-21T14:30:00Z",
+      "updatedAt": "2024-01-21T14:30:00Z"
+    }
+  ],
+  "workflowInstances": [
+    {
+      "id": "1",
+      "workflowId": "1",
+      "taskId": "1",
+      "status": "running",
+      "currentStage": "stage-1",
+      "currentActivity": "activity-1",
+      "assignedTo": "dev-team@company.com",
+      "startedAt": "2024-01-20T14:30:00Z",
+      "startedBy": "admin@company.com",
+      "logs": [
+        {
+          "id": "1",
+          "timestamp": "2024-01-20T14:30:00Z",
+          "stage": "stage-1",
+          "activity": "activity-1",
+          "action": "started",
+          "status": "in_progress",
+          "message": "Task assigned to dev-team@company.com",
+          "performedBy": "admin@company.com"
+        }
+      ]
+    }
+  ]
+}

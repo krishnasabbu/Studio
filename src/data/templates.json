@@ -1,0 +1,85 @@
+[
+  {
+    "id": "1",
+    "messageTypeId": "6333",
+    "messageName": "Zelle Add Payment Recipient",
+    "channels": ["External Email", "Secure Inbox"],
+    "language": "English",
+    "type": "Email",
+    "status": "active",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z",
+    "content": {
+      "subject": "Payment Recipient Added Successfully",
+      "header": "Zelle Payment Notification",
+      "body": "Your payment recipient has been successfully added to your Zelle account.",
+      "footer": "Thank you for using our services",
+      "properties": {
+        "prop1": "Brand Color: #3B82F6",
+        "prop2": "Font: Inter",
+        "prop3": "Layout: Modern"
+      }
+    }
+  },
+  {
+    "id": "2",
+    "messageTypeId": "7445",
+    "messageName": "Account Security Alert",
+    "channels": ["External Email", "Push"],
+    "language": "English",
+    "type": "Email",
+    "status": "active",
+    "createdAt": "2024-01-16T14:30:00Z",
+    "updatedAt": "2024-01-16T14:30:00Z",
+    "content": {
+      "subject": "Security Alert: New Login Detected",
+      "header": "Account Security",
+      "body": "We detected a new login to your account from an unrecognized device.",
+      "footer": "Security Team",
+      "properties": {
+        "prop1": "Security Level: High",
+        "prop2": "Alert Type: Login",
+        "prop3": "Priority: High"
+      }
+    }
+  },
+  {
+    "id": "3",
+    "messageTypeId": "8901",
+    "messageName": "Weekly Promotion Alert",
+    "channels": ["Push", "SMS"],
+    "language": "Spanish",
+    "type": "Push",
+    "status": "draft",
+    "createdAt": "2024-01-17T09:15:00Z",
+    "updatedAt": "2024-01-17T09:15:00Z",
+    "content": {
+      "subject": "¡Oferta Especial de la Semana!",
+      "body": "No te pierdas nuestras increíbles ofertas de esta semana.",
+      "properties": {
+        "prop1": "Descuento: 25%",
+        "prop2": "Duración: 7 días",
+        "prop3": "Categoría: Promocional"
+      }
+    }
+  },
+  {
+    "id": "4",
+    "messageTypeId": "5566",
+    "messageName": "Transaction Confirmation",
+    "channels": ["SMS"],
+    "language": "English",
+    "type": "SMS",
+    "status": "active",
+    "createdAt": "2024-01-18T11:20:00Z",
+    "updatedAt": "2024-01-18T11:20:00Z",
+    "content": {
+      "body": "Your transaction of $150.00 has been completed successfully. Reference: TXN123456789",
+      "properties": {
+        "prop1": "Character Limit: 160",
+        "prop2": "Delivery: Immediate",
+        "prop3": "Priority: High"
+      }
+    }
+  }
+]
