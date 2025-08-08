@@ -567,6 +567,42 @@
       "createdBy": "current.user@company.com",
       "createdAt": "2025-08-08T06:18:50.918Z",
       "updatedAt": "2025-08-08T06:18:50.918Z"
+    },
+    {
+      "id": "1754633953232",
+      "name": "dsafadsfas",
+      "description": "",
+      "version": "1.0",
+      "status": "draft",
+      "stages": [
+        {
+          "id": "stage-1",
+          "name": "Dev",
+          "order": 0,
+          "activities": []
+        },
+        {
+          "id": "stage-2",
+          "name": "RQA",
+          "order": 1,
+          "activities": []
+        },
+        {
+          "id": "stage-3",
+          "name": "Stage",
+          "order": 2,
+          "activities": []
+        },
+        {
+          "id": "stage-4",
+          "name": "Prod",
+          "order": 3,
+          "activities": []
+        }
+      ],
+      "createdBy": "current.user@company.com",
+      "createdAt": "2025-08-08T06:19:13.232Z",
+      "updatedAt": "2025-08-08T06:19:13.232Z"
     }
   ],
   "workflowExecutions": [
