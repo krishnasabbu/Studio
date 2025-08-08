@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetWorkflowsQuery, useDeleteWorkflowMutation, useGetWorkflowInstancesQuery, useGetTasksQuery } from '../services/api';
 import { usePermissions } from '../hooks/useRedux';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { Plus, Edit, Trash2, Play, GitBranch, Calendar, User, Eye, Activity, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Play, GitBranch, Calendar, User, Eye, Activity, CheckCircle, Clock, XCircle, Search, Filter, Grid, List } from 'lucide-react';
 
 const WorkflowDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -532,146 +532,6 @@ const WorkflowDashboardPage: React.FC = () => {
             }
           </p>
           {hasPermission('create') && !searchTerm && !statusFilter && (
-            <Button 
-              onClick={() => navigate('/workflows/create')}
-              className="bg-primary-600 hover:bg-primary-700 text-white"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Create Workflow
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default WorkflowDashboardPage;
-
-          <Card 
-            key={workflow.id} 
-            className="p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <GitBranch className="h-6 w-6 text-primary-500" />
-                <div>
-                  <h3 className="font-semibold text-primary-700 dark:text-white">
-                    {workflow.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    v{workflow.version}
-                  </p>
-                </div>
-              </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}>
-                {workflow.status.charAt(0).toUpperCase() + workflow.status.slice(1)}
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                {workflow.description}
-              </p>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Stages:</span>
-                <span className="text-gray-900 dark:text-white font-medium">
-                  {workflow.stages?.length || 0}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Activities:</span>
-                <span className="text-gray-900 dark:text-white font-medium">
-                  {workflow.stages?.reduce((total: number, stage: any) => total + (stage.activities?.length || 0), 0) || 0}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Linked Tasks:</span>
-                <span className="text-gray-900 dark:text-white font-medium">
-                  {tasks.filter(t => t.assignedWorkflow === workflow.id).length}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Created:</span>
-                <span className="text-gray-900 dark:text-white flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  {new Date(workflow.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Created By:</span>
-                <span className="text-gray-900 dark:text-white flex items-center">
-                  <User className="h-4 w-4 mr-1" />
-                  {workflow.createdBy.split('@')[0]}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex space-x-2 mt-6" onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleView(workflow.id)}
-                className="flex-1"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                View
-              </Button>
-              
-              {hasPermission('update') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(workflow.id)}
-                  className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              )}
-              
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleExecute(workflow.id)}
-                className="flex-1 bg-accent-600 hover:bg-accent-700 text-white"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Execute
-              </Button>
-              
-              {hasPermission('delete') && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(workflow.id)}
-                  className="px-3"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {workflows.length === 0 && (
-        <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
-            <GitBranch className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No workflows yet
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Create your first dynamic workflow to automate your processes
-          </p>
-          {hasPermission('create') && (
             <Button 
               onClick={() => navigate('/workflows/create')}
               className="bg-primary-600 hover:bg-primary-700 text-white"
