@@ -17,7 +17,7 @@ const AlertsDashboardPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 12;
 
   const handleDelete = async (alertId: string) => {
     if (confirm('Are you sure you want to delete this alert?')) {
@@ -144,17 +144,17 @@ const AlertsDashboardPage: React.FC = () => {
 
       {/* Content */}
       {viewMode === 'card' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {paginatedAlerts.map((alert) => (
             <Card 
               key={alert.id} 
-              className="p-4 hover:shadow-xl transition-all duration-300 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
+              className="p-3 hover:shadow-xl transition-all duration-300 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center space-x-2 min-w-0 flex-1">
+                  <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-xs truncate">
                       {alert.name || 'Unnamed Alert'}
                     </h3>
                     {alert.jiraId && (
@@ -164,12 +164,12 @@ const AlertsDashboardPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(alert.status)}`}>
+                <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(alert.status)}`}>
                   {alert.status}
                 </span>
               </div>
 
-              <div className="space-y-2 text-xs">
+              <div className="space-y-1 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Templates:</span>
                   <span className="text-gray-900 dark:text-white font-medium">
@@ -185,13 +185,13 @@ const AlertsDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex space-x-2 mt-4">
+              <div className="flex space-x-1 mt-3">
                 {hasPermission('update') && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(alert.id)}
-                    className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50 text-xs"
+                    className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50 text-xs py-1 px-2"
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
@@ -202,7 +202,7 @@ const AlertsDashboardPage: React.FC = () => {
                     variant="danger"
                     size="sm"
                     onClick={() => handleDelete(alert.id)}
-                    className="px-2"
+                    className="px-2 py-1"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
