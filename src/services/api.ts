@@ -257,6 +257,18 @@ export const api = createApi({
       }),
       invalidatesTags: ['Workflow'],
     }),
+    assignWorkflowToFunctionality: builder.mutation<any, { workflowId: string; functionalityId: string; functionalityType: string }>({
+      query: ({ workflowId, functionalityId, functionalityType }) => ({
+        url: '/workflow-assignments',
+        method: 'POST',
+        body: {
+          workflowId,
+          functionalityId,
+          functionalityType,
+          assignedAt: new Date().toISOString(),
+        },
+      }),
+    }),
     executeWorkflow: builder.mutation<any, { workflowId: string; startFromStage?: string }>({
       query: ({ workflowId, startFromStage }) => ({
         url: '/workflows/execute',
@@ -397,6 +409,7 @@ export const {
   useCreateWorkflowMutation,
   useUpdateWorkflowMutation,
   useDeleteWorkflowMutation,
+  useAssignWorkflowToFunctionalityMutation,
   useExecuteWorkflowMutation,
   useGetWorkflowExecutionsQuery,
   useGetActivityTemplatesQuery,

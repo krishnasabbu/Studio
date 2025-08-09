@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetWorkflowQuery, useExecuteWorkflowMutation, useGetWorkflowExecutionsQuery } from '../services/api';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import WorkflowBuilder from '../components/workflow/WorkflowBuilder';
 import { ArrowLeft, Play, Pause, CheckCircle, XCircle, Clock, AlertCircle, Database, Mail, Webhook, UserCheck } from 'lucide-react';
 
 const WorkflowExecutePage: React.FC = () => {
@@ -10,6 +11,7 @@ const WorkflowExecutePage: React.FC = () => {
   const navigate = useNavigate();
   
   const { data: workflow, isLoading: isLoadingWorkflow } = useGetWorkflowQuery(workflowId!);
+  const location = useLocation();
   const { data: executions = [], isLoading: isLoadingExecutions } = useGetWorkflowExecutionsQuery(workflowId!);
   const [executeWorkflow, { isLoading: isExecuting }] = useExecuteWorkflowMutation();
   
@@ -17,6 +19,10 @@ const WorkflowExecutePage: React.FC = () => {
   const [executionLogs, setExecutionLogs] = useState<any[]>([]);
 
   const handleExecuteWorkflow = async (startFromStage?: string) => {
+    // Use workflow from location state if available (for temp workflows)
+    const workflowToExecute = location.state?.workflowData || workflow;
+    if (!workflowToExecute) return;
+
     try {
       const result = await executeWorkflow({ workflowId: workflowId!, startFromStage }).unwrap();
       setCurrentExecution(result);
@@ -30,7 +36,8 @@ const WorkflowExecutePage: React.FC = () => {
   };
 
   const simulateExecution = () => {
-    if (!workflow) return;
+    const workflowToExecute = location.state?.workflowData || workflow;
+    if (!workflowToExecute) return;
 
     const logs: any[] = [];
     let currentStageIndex = 0;
@@ -47,7 +54,7 @@ const WorkflowExecutePage: React.FC = () => {
         return;
       }
 
-      const stage = workflow.stages[currentStageIndex];
+      const stage = workflowToExecute.stages?.[currentStageIndex] || { id: `stage-${currentStageIndex}`, name: `Stage ${currentStageIndex + 1}`, activities: [] };
       
       setExecutionLogs(prev => [...prev, {
         timestamp: new Date().toISOString(),
@@ -156,6 +163,9 @@ const WorkflowExecutePage: React.FC = () => {
     );
   }
 
+  // Use workflow from location state if available (for temp workflows)
+  const workflowToDisplay = location.state?.workflowData || workflow;
+
   if (!workflow) {
     return (
       <div className="text-center py-12">
@@ -179,10 +189,10 @@ const WorkflowExecutePage: React.FC = () => {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-primary-700 dark:text-white">
-              Execute Workflow: {workflow.name}
+              Execute Workflow: {workflowToDisplay?.name || 'Unnamed Workflow'}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {workflow.description}
+              {workflowToDisplay?.description || 'No description available'}
             </p>
           </div>
         </div>
@@ -210,11 +220,24 @@ const WorkflowExecutePage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary-500">
             <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-6">
+              Workflow Visualization
+            </h3>
+            <div className="h-96">
+              <WorkflowBuilder
+                initialWorkflow={workflowToDisplay}
+                onSave={() => {}}
+                readOnly={true}
+              />
+            </div>
+          </Card>
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-primary-500">
+            <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-6">
               Workflow Progress
             </h3>
             
             <div className="space-y-4">
-              {workflow.stages.map((stage: any, index: number) => (
+              {(workflowToDisplay?.stages || []).map((stage: any, index: number) => (
                 <div key={stage.id} className="relative">
                   {/* Stage Header */}
                   <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-primary-200 dark:border-gray-600">
@@ -227,7 +250,7 @@ const WorkflowExecutePage: React.FC = () => {
                           {stage.name}
                         </h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {stage.activities.length} activities
+                          {stage.activities?.length || 0} activities
                         </p>
                       </div>
                     </div>
@@ -245,7 +268,7 @@ const WorkflowExecutePage: React.FC = () => {
 
                   {/* Activities */}
                   <div className="ml-4 mt-2 space-y-2">
-                    {stage.activities.map((activity: any) => {
+                    {(stage.activities || []).map((activity: any) => {
                       const IconComponent = getActivityIcon(activity.type);
                       return (
                         <div
@@ -270,7 +293,7 @@ const WorkflowExecutePage: React.FC = () => {
                   </div>
 
                   {/* Connector Line */}
-                  {index < workflow.stages.length - 1 && (
+                  {index < (workflowToDisplay?.stages?.length || 0) - 1 && (
                     <div className="flex justify-center my-2">
                       <div className="w-0.5 h-6 bg-primary-300"></div>
                     </div>
@@ -279,6 +302,7 @@ const WorkflowExecutePage: React.FC = () => {
               ))}
             </div>
           </Card>
+        </div>
         </div>
 
         {/* Execution Logs */}
