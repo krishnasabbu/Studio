@@ -7,7 +7,8 @@ import OnboardTab from './OnboardTab';
 import TemplateMappingTab from './TemplateMappingTab';
 import FeaturesMappingTab from './FeaturesMappingTab';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useGetTemplatesQuery, useGetJiraDataQuery, useCreateAlertMutation, useUpdateAlertMutation, useGetAlertQuery } from '../services/api';
+import { useGetTemplatesQuery, useGetJiraDataQuery, useCreateAlertMutation, useUpdateAlertMutation, useGetAlertQuery, useGetWorkflowsQuery, useAssignWorkflowToFunctionalityMutation } from '../services/api';
+import Dropdown from '../components/ui/Dropdown';
 
 const AlertOnboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const AlertOnboardPage: React.FC = () => {
   const { data: existingAlert, isLoading: isLoadingAlert } = useGetAlertQuery(alertId!, {
     skip: !alertId,
   });
+  const { data: workflows = [] } = useGetWorkflowsQuery();
+  const [assignWorkflow] = useAssignWorkflowToFunctionalityMutation();
   const [createAlert, { isLoading: isCreatingAlert }] = useCreateAlertMutation();
   const [updateAlert, { isLoading: isUpdatingAlert }] = useUpdateAlertMutation();
   
@@ -26,6 +29,9 @@ const AlertOnboardPage: React.FC = () => {
   
   // Alert name
   const [alertName, setAlertName] = useState('');
+  
+  // Workflow assignment
+  const [selectedWorkflow, setSelectedWorkflow] = useState('');
   
   // Onboard tab state
   const [jiraId, setJiraId] = useState('');
@@ -66,6 +72,7 @@ const AlertOnboardPage: React.FC = () => {
   // Load existing alert data when editing
   React.useEffect(() => {
     if (existingAlert) {
+      setSelectedWorkflow(existingAlert.assignedWorkflow || '');
       setAlertName(existingAlert.name || '');
       setJiraId(existingAlert.jiraId || '');
       setOnboardFields(existingAlert.fields || {
@@ -89,6 +96,11 @@ const AlertOnboardPage: React.FC = () => {
   const handleOnboardFieldChange = React.useCallback((field: string, value: string) => {
     setOnboardFields(prev => ({ ...prev, [field]: value }));
   }, []);
+
+  const workflowOptions = workflows.map(workflow => ({
+    value: workflow.id,
+    label: workflow.name,
+  }));
   const tabOrder = ['onboard', 'template-mapping', 'features-mapping'];
   const currentTabIndex = tabOrder.indexOf(activeTab);
 
@@ -154,6 +166,7 @@ const AlertOnboardPage: React.FC = () => {
         fields: onboardFields,
         selectedTemplates,
         selectedFeatures,
+        assignedWorkflow: selectedWorkflow,
       };
       
       if (isEditing) {
@@ -162,6 +175,15 @@ const AlertOnboardPage: React.FC = () => {
       } else {
         await createAlert(alertData).unwrap();
         //alert('Alert onboarded successfully!');
+      }
+
+      // Assign workflow if selected
+      if (selectedWorkflow) {
+        await assignWorkflow({
+          workflowId: selectedWorkflow,
+          functionalityId: alertData.id,
+          functionalityType: 'alert',
+        });
       }
       
       console.log('Alert Data:', JSON.stringify(alertData, null, 2));
@@ -175,6 +197,7 @@ const AlertOnboardPage: React.FC = () => {
       });
       setSelectedTemplates([]);
       setSelectedFeatures([]);
+      setSelectedWorkflow('');
       setActiveTab('onboard');
       navigate('/alerts-dashboard');
     } catch (error) {
@@ -238,6 +261,19 @@ const AlertOnboardPage: React.FC = () => {
             selectedFeatures={selectedFeatures}
             setSelectedFeatures={setSelectedFeatures}
           />
+          
+          <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
+            <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-4">
+              Workflow Assignment
+            </h3>
+            <Dropdown
+              label="Assign Workflow (Optional)"
+              value={selectedWorkflow}
+              onChange={setSelectedWorkflow}
+              options={workflowOptions}
+              placeholder="Select a workflow to assign"
+            />
+          </Card>
           <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
             <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
               Back
