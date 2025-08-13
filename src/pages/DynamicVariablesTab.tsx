@@ -13,6 +13,7 @@ interface Variable {
 
 interface DynamicVariablesTabProps {
   dynamicVariables: Variable[];
+  isViewing?: boolean;
   onAddVariable: () => void;
   onRemoveVariable: (id: string) => void;
   onChangeVariable: (id: string, field: 'variableName' | 'formatter', value: string) => void;
@@ -31,6 +32,7 @@ const formatterOptions = [
 
 const DynamicVariablesTab: React.FC<DynamicVariablesTabProps> = ({
   dynamicVariables,
+  isViewing = false,
   onAddVariable,
   onRemoveVariable,
   onChangeVariable,
@@ -46,13 +48,15 @@ const DynamicVariablesTab: React.FC<DynamicVariablesTabProps> = ({
             Define variables that can be dynamically replaced in your templates with formatted values
           </p>
         </div>
-        <Button
-          onClick={onAddVariable}
-          className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Variable
-        </Button>
+        {!isViewing && (
+          <Button
+            onClick={onAddVariable}
+            className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Variable
+          </Button>
+        )}
       </div>
 
       {dynamicVariables.length === 0 ? (
@@ -64,15 +68,20 @@ const DynamicVariablesTab: React.FC<DynamicVariablesTabProps> = ({
             No Variables Defined
           </h4>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Add dynamic variables to make your templates more flexible and reusable
+            {isViewing 
+              ? 'No dynamic variables are configured for this template'
+              : 'Add dynamic variables to make your templates more flexible and reusable'
+            }
           </p>
-          <Button
-            onClick={onAddVariable}
-            className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Your First Variable
-          </Button>
+          {!isViewing && (
+            <Button
+              onClick={onAddVariable}
+              className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Variable
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -87,6 +96,7 @@ const DynamicVariablesTab: React.FC<DynamicVariablesTabProps> = ({
                   value={variable.variableName}
                   onChange={(value) => onChangeVariable(variable.id, 'variableName', value)}
                   placeholder="e.g., customerName, orderDate, totalAmount"
+                  disabled={isViewing}
                 />
               </div>
               <div className="flex-1">
@@ -96,18 +106,21 @@ const DynamicVariablesTab: React.FC<DynamicVariablesTabProps> = ({
                   onChange={(value) => onChangeVariable(variable.id, 'formatter', value)}
                   options={formatterOptions}
                   placeholder="Select formatter"
+                  disabled={isViewing}
                 />
               </div>
-              <div className="pb-2">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => onRemoveVariable(variable.id)}
-                  className="px-3"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {!isViewing && (
+                <div className="pb-2">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => onRemoveVariable(variable.id)}
+                    className="px-3"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
 

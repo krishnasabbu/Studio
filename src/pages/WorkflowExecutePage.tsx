@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useGetWorkflowQuery, useExecuteWorkflowMutation, useGetWorkflowExecutionsQuery } from '../services/api';
+import { ReactFlowProvider } from 'reactflow';
+import { useGetWorkflowQuery, useExecuteWorkflowMutation } from '../services/api';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import WorkflowBuilder from '../components/workflow/WorkflowBuilder';
@@ -12,7 +13,6 @@ const WorkflowExecutePage: React.FC = () => {
   
   const { data: workflow, isLoading: isLoadingWorkflow } = useGetWorkflowQuery(workflowId!);
   const location = useLocation();
-  const { data: executions = [], isLoading: isLoadingExecutions } = useGetWorkflowExecutionsQuery(workflowId!);
   const [executeWorkflow, { isLoading: isExecuting }] = useExecuteWorkflowMutation();
   
   const [currentExecution, setCurrentExecution] = useState<any>(null);
@@ -223,11 +223,13 @@ const WorkflowExecutePage: React.FC = () => {
               Workflow Visualization
             </h3>
             <div className="h-96">
-              <WorkflowBuilder
-                initialWorkflow={workflowToDisplay}
-                onSave={() => {}}
-                readOnly={true}
-              />
+              <ReactFlowProvider>
+                <WorkflowBuilder
+                  initialWorkflow={workflowToDisplay}
+                  onSave={() => {}}
+                  readOnly={true}
+                />
+              </ReactFlowProvider>
             </div>
           </Card>
         <div className="lg:col-span-2 space-y-6">
@@ -343,46 +345,6 @@ const WorkflowExecutePage: React.FC = () => {
             </div>
           </Card>
 
-          {/* Execution History */}
-          <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
-            <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-4">
-              Execution History
-            </h3>
-            
-            {isLoadingExecutions ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              </div>
-            ) : executions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No previous executions
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {executions.map((execution: any) => (
-                  <div
-                    key={execution.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600"
-                  >
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        Execution #{execution.id}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Started by {execution.startedBy}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {new Date(execution.startedAt).toLocaleString()}
-                      </div>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(execution.status)}`}>
-                      {execution.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
         </div>
       </div>
     </div>

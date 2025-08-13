@@ -14,15 +14,18 @@ import { GripVertical } from 'lucide-react';
 
 interface WidgetRendererProps {
   widget: Widget;
+  isViewing?: boolean;
 }
 
-const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget }) => {
+const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, isViewing = false }) => {
   const dispatch = useAppDispatch();
   const { selectedComponent } = useAppSelector(state => state.emailEditor);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'component',
     drop: (item: ComponentType) => {
+      if (isViewing) return;
+      
       if (item.allowedWidgets.includes(widget.type)) {
         const newComponent = {
           id: uuidv4(),
@@ -36,11 +39,12 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget }) => {
       }
     },
     collect: (monitor) => ({
-      isOver: monitor.isOver(),
+      isOver: !isViewing && monitor.isOver(),
     }),
   }));
 
   const handleComponentClick = (component: any, e: React.MouseEvent) => {
+    if (isViewing) return;
     e.stopPropagation();
     dispatch(selectComponent(component));
   };
@@ -71,27 +75,34 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget }) => {
         selectedComponent?.id === widget.id ? 'ring-2 ring-blue-500' : ''
       } ${getWidgetColor(widget.type)} ${
         isOver ? 'border-dashed border-blue-400' : 'border-solid'
+      } ${
+        isViewing ? 'opacity-90' : ''
       }`}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
+          <GripVertical className={`h-4 w-4 text-gray-400 ${isViewing ? 'cursor-default' : 'cursor-move'}`} />
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {getWidgetTitle(widget.type)}
           </h3>
+          {isViewing && (
+            <span className="px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 rounded-full text-xs font-medium">
+              Read Only
+            </span>
+          )}
         </div>
       </div>
 
       <div
         ref={drop}
-        className={`min-h-24 rounded border-2 border-dashed transition-all duration-200 ${
+        className={`min-h-24 rounded border-2 ${isViewing ? 'border-solid' : 'border-dashed'} transition-all duration-200 ${
           isOver ? 'border-blue-400 bg-blue-100 dark:bg-blue-800/30' : 'border-gray-300 dark:border-gray-600'
         }`}
       >
         {sortedComponents.length === 0 ? (
           <div className="flex items-center justify-center h-24">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Drop components here
+              {isViewing ? 'No components in this widget' : 'Drop components here'}
             </p>
           </div>
         ) : (
@@ -100,44 +111,46 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget }) => {
               <div
                 key={component.id}
                 onClick={(e) => handleComponentClick(component, e)}
-                className={`cursor-pointer rounded transition-all duration-200 ${
+                className={`${isViewing ? 'cursor-default' : 'cursor-pointer'} rounded transition-all duration-200 ${
                   selectedComponent?.id === component.id
                     ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : 'hover:bg-white dark:hover:bg-gray-700'
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <EmailComponentRenderer component={component} />
-                  <div className="flex flex-col ml-2 space-y-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dispatch(moveComponent({
-                          widgetId: widget.id,
-                          componentId: component.id,
-                          direction: 'up',
-                        }));
-                      }}
-                      disabled={index === 0}
-                      className="text-xs text-gray-500 hover:text-blue-600 disabled:opacity-30"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dispatch(moveComponent({
-                          widgetId: widget.id,
-                          componentId: component.id,
-                          direction: 'down',
-                        }));
-                      }}
-                      disabled={index === sortedComponents.length - 1}
-                      className="text-xs text-gray-500 hover:text-blue-600 disabled:opacity-30"
-                    >
-                      ↓
-                    </button>
-                  </div>
+                  <EmailComponentRenderer component={component} isViewing={isViewing} />
+                  {!isViewing && (
+                    <div className="flex flex-col ml-2 space-y-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(moveComponent({
+                            widgetId: widget.id,
+                            componentId: component.id,
+                            direction: 'up',
+                          }));
+                        }}
+                        disabled={index === 0}
+                        className="text-xs text-gray-500 hover:text-blue-600 disabled:opacity-30"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(moveComponent({
+                            widgetId: widget.id,
+                            componentId: component.id,
+                            direction: 'down',
+                          }));
+                        }}
+                        disabled={index === sortedComponents.length - 1}
+                        className="text-xs text-gray-500 hover:text-blue-600 disabled:opacity-30"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

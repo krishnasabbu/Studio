@@ -25,6 +25,7 @@ type TemplateCreationFormProps = {
   };
   errors: Record<string, string>;
   isSubmitting: boolean;
+  isViewing?: boolean;
   setFormData: React.Dispatch<React.SetStateAction<{
     messageTypeId: string;
     messageName: string;
@@ -39,6 +40,7 @@ const TemplateCreationForm: React.FC<TemplateCreationFormProps> = ({
   formData,
   errors,
   isSubmitting,
+  isViewing = false,
   setFormData,
   handleCancel,
   handleNext,
@@ -51,6 +53,7 @@ const TemplateCreationForm: React.FC<TemplateCreationFormProps> = ({
             value={formData.messageTypeId}
             onChange={(value) => setFormData(prev => ({ ...prev, messageTypeId: value }))}
             placeholder="e.g., 101, 102"
+            disabled={isViewing}
           />
 
           <InputField
@@ -59,6 +62,7 @@ const TemplateCreationForm: React.FC<TemplateCreationFormProps> = ({
             onChange={(value) => setFormData(prev => ({ ...prev, messageName: value }))}
             placeholder="e.g., Overdraft, Account Update"
             error={errors.messageName}
+            disabled={isViewing}
             required
           />
 
@@ -69,6 +73,7 @@ const TemplateCreationForm: React.FC<TemplateCreationFormProps> = ({
             options={channelOptions}
             placeholder="Select delivery channels"
             error={errors.channels}
+            disabled={isViewing}
             required
           />
 
@@ -79,39 +84,42 @@ const TemplateCreationForm: React.FC<TemplateCreationFormProps> = ({
             options={languageOptions}
             placeholder="Select language"
             error={errors.language}
+            disabled={isViewing}
             required
           />
 
-          <div className="flex space-x-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </div>
-              ) : (
-                <>
-                  <ArrowRight className="h-5 w-5 mr-2" />
-                  Next: Design Template
-                </>
-              )}
-            </Button>
+          {!isViewing && (
+            <div className="flex space-x-4 pt-6">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  <>
+                    <ArrowRight className="h-5 w-5 mr-2" />
+                    Next: Design Template
+                  </>
+                )}
+              </Button>
             
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-              className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50"
-            >
-              <X className="h-5 w-5 mr-2" />
-              Cancel
-            </Button>
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50"
+              >
+                <X className="h-5 w-5 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
         </form>
     </Card>
   );

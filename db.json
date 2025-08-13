@@ -62,6 +62,45 @@
       "createdAt": "2024-01-17T09:15:00Z",
       "updatedAt": "2024-01-17T09:15:00Z",
       "widgets": []
+    },
+    {
+      "id": "1755066481227",
+      "messageTypeId": "4334542",
+      "messageName": "asdfasdfadsf",
+      "channel": "External Email",
+      "language": "English",
+      "status": "draft",
+      "content": "",
+      "createdAt": "2025-08-13T06:28:01.227Z",
+      "updatedAt": "2025-08-13T06:28:01.227Z",
+      "type": "Email",
+      "widgets": [
+        {
+          "id": "f87c9b56-3fd6-4413-83c7-aeaf4edc9ac1",
+          "type": "BodyWidget",
+          "components": [
+            {
+              "id": "c7c08344-c968-4dda-8e7d-560bab43896c",
+              "type": "BodyText",
+              "content": "<p>Body text content goes here. This is a paragraph of text that can be customized.</p>",
+              "properties": {
+                "fontSize": "14px",
+                "lineHeight": "1.6"
+              },
+              "order": 0,
+              "widgetId": "f87c9b56-3fd6-4413-83c7-aeaf4edc9ac1"
+            }
+          ],
+          "order": 0
+        }
+      ],
+      "dynamicVariables": [
+        {
+          "id": "9e666cad-c1f4-4f44-93f0-2293bd3837dd",
+          "variableName": "dsfasdfasdf",
+          "formatter": "date"
+        }
+      ]
     }
   ],
   "users": [
@@ -385,6 +424,61 @@
       ]
     },
     {
+      "workflowMappings": [
+        {
+          "id": "1",
+          "workflowId": "1",
+          "functionalityType": "alert",
+          "functionalityId": "1",
+          "functionalityName": "High CPU Alert",
+          "autoTrigger": true,
+          "createdAt": "2024-01-20T10:00:00Z"
+        }
+      ],
+      "alertExecutions": [
+        {
+          "id": "1",
+          "alertId": "1",
+          "workflowId": "1",
+          "status": "in_progress",
+          "currentStepId": "step-2",
+          "startedAt": "2024-01-20T14:30:00Z",
+          "startedBy": "admin@company.com",
+          "approvalHistory": [
+            {
+              "id": "1",
+              "stepId": "step-1",
+              "stepName": "Initial Review",
+              "approverName": "John Manager",
+              "approverRole": "manager",
+              "decision": "approved",
+              "timestamp": "2024-01-20T15:00:00Z",
+              "comments": "Alert configuration looks good, proceeding to next step",
+              "timeToDecision": 30
+            }
+          ],
+          "executionLogs": [
+            {
+              "id": "1",
+              "timestamp": "2024-01-20T14:30:00Z",
+              "stepId": "workflow",
+              "action": "started",
+              "status": "info",
+              "message": "Alert workflow execution started",
+              "performedBy": "admin@company.com"
+            },
+            {
+              "id": "2",
+              "timestamp": "2024-01-20T15:00:00Z",
+              "stepId": "step-1",
+              "action": "approved",
+              "status": "success",
+              "message": "Step approved by John Manager",
+              "performedBy": "john.manager@company.com"
+            }
+          ]
+        }
+      ],
       "id": "5",
       "messageType": "9988",
       "messageName": "Insurance Policy Renewal",
@@ -403,356 +497,404 @@
       ]
     }
   ],
-  "workflows": [
+  "nodes": [
     {
       "id": "1",
-      "name": "Payment Processing Workflow",
-      "description": "Complete payment processing pipeline from dev to production",
-      "createdBy": "admin@company.com",
+      "name": "Development",
+      "type": "process",
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Testing",
+      "type": "process",
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Review",
+      "type": "decision",
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "4",
+      "name": "Deployment",
+      "type": "process",
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "1754720361531",
+      "name": "Test12",
+      "type": "decision",
+      "createdAt": "2025-08-09T06:19:21.531Z"
+    },
+    {
+      "id": "1754720396609",
+      "name": "TestStart",
+      "type": "start",
+      "createdAt": "2025-08-09T06:19:56.609Z"
+    },
+    {
+      "id": "1754720411644",
+      "name": "TestEnd",
+      "type": "end",
+      "createdAt": "2025-08-09T06:20:11.644Z"
+    }
+  ],
+  "activities": [
+    {
+      "id": "1",
+      "workflowId": null,
+      "name": "Code Review",
+      "type": "manual",
+      "status": "pending",
+      "createdAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "workflowId": null,
+      "name": "Unit Testing",
+      "type": "automated",
+      "status": "pending",
+      "createdAt": "2024-01-20T10:00:00Z"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "1754910635370",
+      "name": "Test Workflow",
+      "description": "Test Workflow",
       "version": "1.0",
-      "status": "active",
-      "createdAt": "2024-01-20T10:00:00Z",
-      "updatedAt": "2024-01-20T10:00:00Z",
-      "stages": [
+      "status": "draft",
+      "nodes": [
         {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "status": "pending",
-          "activities": [
-            {
-              "id": "activity-1",
-              "type": "Execute DB Query",
-              "name": "Initialize Payment Tables",
-              "order": 0,
-              "status": "pending",
-              "config": {
-                "query": "CREATE TABLE IF NOT EXISTS payments (id INT PRIMARY KEY, amount DECIMAL(10,2), status VARCHAR(50));",
-                "database": "dev_db"
-              }
+          "id": "stage-1754910543529",
+          "type": "stageNode",
+          "position": {
+            "x": -36.46760460540452,
+            "y": 153.49274884252975
+          },
+          "data": {
+            "stageName": "Dev",
+            "environment": "Dev",
+            "parameters": {
+              "dbName": "stage_database",
+              "serviceUrl": "https://stage.api.example.com",
+              "environment": "staging"
             },
-            {
-              "id": "activity-2",
-              "type": "Email Alert",
-              "name": "Dev Environment Ready",
-              "order": 1,
-              "status": "pending",
-              "config": {
-                "templateId": "1",
-                "recipients": [
-                  "dev-team@company.com"
-                ],
-                "subject": "Dev Environment Ready for Testing"
-              }
-            }
-          ]
+            "status": "pending",
+            "label": "Dev"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": false,
+          "positionAbsolute": {
+            "x": -36.46760460540452,
+            "y": 153.49274884252975
+          },
+          "dragging": false
         },
         {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "status": "pending",
-          "activities": [
-            {
-              "id": "activity-3",
-              "type": "Manual Approval",
-              "name": "QA Sign-off",
-              "order": 0,
-              "status": "pending",
-              "config": {
-                "approvers": [
-                  "qa-lead@company.com"
-                ],
-                "instructions": "Please verify all test cases pass before approval"
-              }
-            }
-          ]
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "status": "pending",
-          "activities": [
-            {
-              "id": "activity-4",
-              "type": "Webhook Trigger",
-              "name": "Deploy to Staging",
-              "order": 0,
-              "status": "pending",
-              "config": {
-                "url": "https://api.staging.company.com/deploy",
-                "method": "POST",
-                "headers": {
-                  "Authorization": "Bearer staging-token"
-                },
-                "payload": {
-                  "environment": "staging",
-                  "version": "1.0"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "status": "pending",
-          "activities": [
-            {
-              "id": "activity-5",
-              "type": "Manual Approval",
-              "name": "Production Deployment Approval",
-              "order": 0,
-              "status": "pending",
-              "config": {
-                "approvers": [
-                  "prod-manager@company.com",
-                  "cto@company.com"
-                ],
-                "instructions": "Final approval required for production deployment"
-              }
+          "id": "stage-1754910547907",
+          "type": "stageNode",
+          "position": {
+            "x": 516.2097508615161,
+            "y": 239.8814162096835
+          },
+          "data": {
+            "stageName": "QA",
+            "environment": "QA",
+            "parameters": {
+              "dbName": "stage_database"
             },
-            {
-              "id": "activity-6",
-              "type": "Webhook Trigger",
-              "name": "Deploy to Production",
-              "order": 1,
-              "status": "pending",
-              "config": {
-                "url": "https://api.prod.company.com/deploy",
-                "method": "POST",
-                "headers": {
-                  "Authorization": "Bearer prod-token"
-                }
-              }
-            }
-          ]
+            "status": "pending",
+            "label": "QA"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": false,
+          "positionAbsolute": {
+            "x": 516.2097508615161,
+            "y": 239.8814162096835
+          },
+          "dragging": false
+        }
+      ],
+      "edges": [
+        {
+          "source": "stage-1754910543529",
+          "sourceHandle": null,
+          "target": "stage-1754910547907",
+          "targetHandle": null,
+          "id": "edge-1754910554843",
+          "type": "approval",
+          "markerEnd": {
+            "type": "arrowclosed"
+          },
+          "data": {
+            "requiresApproval": true,
+            "approverRole": "admin",
+            "status": "pending",
+            "approvalTimeout": "4",
+            "autoApprove": false
+          },
+          "selected": false
+        }
+      ],
+      "createdBy": "current.user@company.com",
+      "createdAt": "2025-08-11T11:10:35.370Z",
+      "updatedAt": "2025-08-11T11:10:35.370Z"
+    },
+    {
+      "id": "1754918887777",
+      "name": "test123",
+      "description": "test123",
+      "version": "1.0",
+      "status": "draft",
+      "nodes": [
+        {
+          "id": "stage-1754918774241",
+          "type": "stageNode",
+          "position": {
+            "x": -52.49815684037662,
+            "y": 84.47206246653752
+          },
+          "data": {
+            "stageName": "Dev",
+            "environment": "Dev",
+            "parameters": {
+              "environment": "dev"
+            },
+            "status": "pending",
+            "label": "Dev"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": true,
+          "positionAbsolute": {
+            "x": -52.49815684037662,
+            "y": 84.47206246653752
+          },
+          "dragging": false
+        },
+        {
+          "id": "stage-1754918778234",
+          "type": "stageNode",
+          "position": {
+            "x": 549.7556306225761,
+            "y": 105.33198815855388
+          },
+          "data": {
+            "stageName": "QA",
+            "environment": "QA",
+            "parameters": {
+              "environment": "qa"
+            },
+            "status": "pending",
+            "label": "QA"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": false,
+          "positionAbsolute": {
+            "x": 549.7556306225761,
+            "y": 105.33198815855388
+          },
+          "dragging": false
+        }
+      ],
+      "edges": [
+        {
+          "source": "stage-1754918774241",
+          "sourceHandle": null,
+          "target": "stage-1754918778234",
+          "targetHandle": null,
+          "id": "edge-1754918838655",
+          "type": "approval",
+          "markerEnd": {
+            "type": "arrowclosed"
+          },
+          "data": {
+            "requiresApproval": true,
+            "approverRole": "admin",
+            "status": "pending",
+            "approvalTimeout": "1",
+            "autoApprove": false
+          },
+          "selected": false
+        }
+      ],
+      "createdBy": "current.user@company.com",
+      "updatedAt": "2025-08-12T04:14:38.883Z"
+    },
+    {
+      "id": "1754973706802",
+      "name": "Sample Workflow",
+      "description": "Sample Workflow",
+      "version": "1.0",
+      "status": "draft",
+      "nodes": [
+        {
+          "id": "stage-1754973611326",
+          "type": "stageNode",
+          "position": {
+            "x": -47.299955977813795,
+            "y": 162.24810624066004
+          },
+          "data": {
+            "stageName": "Dev",
+            "environment": "Dev",
+            "parameters": {
+              "environment": "dev"
+            },
+            "status": "pending",
+            "label": "Dev"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": false,
+          "positionAbsolute": {
+            "x": -47.299955977813795,
+            "y": 162.24810624066004
+          },
+          "dragging": false
+        },
+        {
+          "id": "stage-1754973619114",
+          "type": "stageNode",
+          "position": {
+            "x": 540.3161127873552,
+            "y": 149.61713316617744
+          },
+          "data": {
+            "stageName": "QA",
+            "environment": "QA",
+            "parameters": {
+              "environment": "qa"
+            },
+            "status": "pending",
+            "label": "QA"
+          },
+          "width": 140,
+          "height": 126,
+          "selected": true,
+          "positionAbsolute": {
+            "x": 540.3161127873552,
+            "y": 149.61713316617744
+          },
+          "dragging": false
+        }
+      ],
+      "edges": [
+        {
+          "source": "stage-1754973611326",
+          "sourceHandle": null,
+          "target": "stage-1754973619114",
+          "targetHandle": null,
+          "id": "edge-1754973663213",
+          "type": "approval",
+          "markerEnd": {
+            "type": "arrowclosed"
+          },
+          "data": {
+            "requiresApproval": true,
+            "approverRole": "admin",
+            "status": "pending",
+            "approvalTimeout": "1",
+            "autoApprove": false
+          },
+          "selected": false
+        }
+      ],
+      "createdBy": "current.user@company.com",
+      "createdAt": "2025-08-12T04:41:46.802Z",
+      "updatedAt": "2025-08-12T04:41:46.802Z"
+    }
+  ],
+  "pendingApprovals": [
+    {
+      "id": "1",
+      "workflowId": null,
+      "workflowName": "Payment Processing Workflow",
+      "instanceId": "instance-1",
+      "stageId": "stage-2",
+      "stageName": "RQA",
+      "activityId": "activity-3",
+      "activityName": "QA Sign-off",
+      "requestedBy": "admin@company.com",
+      "requestedAt": "2024-01-20T14:30:00Z",
+      "approver": "qa-lead@company.com",
+      "status": "pending",
+      "priority": "high",
+      "description": "Please verify all test cases pass before approval"
+    },
+    {
+      "id": "2",
+      "workflowId": null,
+      "workflowName": "Payment Processing Workflow",
+      "instanceId": "instance-1",
+      "stageId": "stage-4",
+      "stageName": "Prod",
+      "activityId": "activity-5",
+      "activityName": "Production Deployment Approval",
+      "requestedBy": "qa-lead@company.com",
+      "requestedAt": "2024-01-21T10:15:00Z",
+      "approver": "prod-manager@company.com",
+      "status": "pending",
+      "priority": "critical",
+      "description": "Final approval required for production deployment"
+    }
+  ],
+  "workflowInstances": [
+    {
+      "id": "1",
+      "workflowId": "09db5ab9-d4d0-4792-8bbf-9c9e30e4ab7d",
+      "taskId": "1",
+      "status": "running",
+      "currentStage": "stage-1",
+      "currentActivity": "activity-1",
+      "assignedTo": "dev-team@company.com",
+      "startedAt": "2024-01-20T14:30:00Z",
+      "startedBy": "admin@company.com",
+      "logs": [
+        {
+          "id": "1",
+          "timestamp": "2024-01-20T14:30:00Z",
+          "stage": "stage-1",
+          "activity": "activity-1",
+          "action": "started",
+          "status": "in_progress",
+          "message": "Task assigned to dev-team@company.com",
+          "performedBy": "admin@company.com"
         }
       ]
+    }
+  ],
+  "mappings": [],
+  "stages": [
+    {
+      "id": "1",
+      "name": "Development",
+      "type": "DB",
+      "description": "Development stage activities"
     },
     {
-      "id": "1754633930918",
-      "name": "dasfadsf",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:18:50.918Z",
-      "updatedAt": "2025-08-08T06:18:50.918Z"
+      "id": "2",
+      "name": "Testing",
+      "type": "Service",
+      "description": "Testing stage activities"
     },
     {
-      "id": "1754633953232",
-      "name": "dsafadsfas",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:19:13.232Z",
-      "updatedAt": "2025-08-08T06:19:13.232Z"
-    },
-    {
-      "id": "1754633959815",
-      "name": "4t53534",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:19:19.815Z",
-      "updatedAt": "2025-08-08T06:19:19.815Z"
-    },
-    {
-      "id": "1754633966699",
-      "name": "hjgrjhtrher",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:19:26.699Z",
-      "updatedAt": "2025-08-08T06:19:26.699Z"
-    },
-    {
-      "id": "1754633972986",
-      "name": "rtewgtewgsfgd",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:19:32.986Z",
-      "updatedAt": "2025-08-08T06:19:32.986Z"
-    },
-    {
-      "id": "1754633985700",
-      "name": "ewtqetqtqe",
-      "description": "",
-      "version": "1.0",
-      "status": "draft",
-      "stages": [
-        {
-          "id": "stage-1",
-          "name": "Dev",
-          "order": 0,
-          "activities": []
-        },
-        {
-          "id": "stage-2",
-          "name": "RQA",
-          "order": 1,
-          "activities": []
-        },
-        {
-          "id": "stage-3",
-          "name": "Stage",
-          "order": 2,
-          "activities": []
-        },
-        {
-          "id": "stage-4",
-          "name": "Prod",
-          "order": 3,
-          "activities": []
-        }
-      ],
-      "createdBy": "current.user@company.com",
-      "createdAt": "2025-08-08T06:19:45.700Z",
-      "updatedAt": "2025-08-08T06:19:45.700Z"
+      "id": "3",
+      "name": "Production",
+      "type": "Webhook",
+      "description": "Production deployment activities"
     }
   ],
   "workflowExecutions": [
     {
       "id": "1",
-      "workflowId": "1",
+      "workflowId": null,
       "status": "running",
       "currentStage": "stage-1",
       "startedAt": "2024-01-20T14:30:00Z",
@@ -818,31 +960,30 @@
       "createdBy": "developer@company.com",
       "createdAt": "2024-01-21T14:30:00Z",
       "updatedAt": "2024-01-21T14:30:00Z"
-    }
-  ],
-  "workflowInstances": [
+    },
     {
-      "id": "1",
-      "workflowId": "1",
-      "taskId": "1",
-      "status": "running",
-      "currentStage": "stage-1",
-      "currentActivity": "activity-1",
-      "assignedTo": "dev-team@company.com",
-      "startedAt": "2024-01-20T14:30:00Z",
-      "startedBy": "admin@company.com",
-      "logs": [
-        {
-          "id": "1",
-          "timestamp": "2024-01-20T14:30:00Z",
-          "stage": "stage-1",
-          "activity": "activity-1",
-          "action": "started",
-          "status": "in_progress",
-          "message": "Task assigned to dev-team@company.com",
-          "performedBy": "admin@company.com"
-        }
-      ]
+      "id": "1754982705508",
+      "releaseNumber": "R2024",
+      "title": "query",
+      "description": "query",
+      "sqlQuery": "query",
+      "assignedWorkflow": "09db5ab9-d4d0-4792-8bbf-9c9e30e4ab7d",
+      "status": "pending",
+      "createdBy": "current.user@company.com",
+      "createdAt": "2025-08-12T07:11:45.508Z",
+      "updatedAt": "2025-08-12T07:11:45.508Z"
+    },
+    {
+      "id": "1754996862535",
+      "releaseNumber": "123",
+      "title": "Query",
+      "description": "Query",
+      "sqlQuery": "Query",
+      "assignedWorkflow": "09db5ab9-d4d0-4792-8bbf-9c9e30e4ab7d",
+      "status": "in_progress",
+      "createdBy": "current.user@company.com",
+      "createdAt": "2025-08-12T11:07:42.535Z",
+      "updatedAt": "2025-08-12T11:07:42.535Z"
     }
   ]
 }

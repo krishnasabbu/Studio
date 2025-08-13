@@ -43,7 +43,7 @@ const InputField: React.FC<InputFieldProps> = ({
             : 'border-gray-300 dark:border-gray-600'
         } ${
           disabled
-            ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed'
+            ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-75'
             : 'bg-white dark:bg-gray-700'
         } dark:text-white`}
       />

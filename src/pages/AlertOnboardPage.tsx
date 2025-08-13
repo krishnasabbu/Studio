@@ -6,22 +6,26 @@ import { Download } from 'lucide-react';
 import OnboardTab from './OnboardTab';
 import TemplateMappingTab from './TemplateMappingTab';
 import FeaturesMappingTab from './FeaturesMappingTab';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useGetTemplatesQuery, useGetJiraDataQuery, useCreateAlertMutation, useUpdateAlertMutation, useGetAlertQuery, useGetWorkflowsQuery, useAssignWorkflowToFunctionalityMutation } from '../services/api';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import { useGetTemplatesQuery, useGetJiraDataQuery, useCreateAlertMutation, useUpdateAlertMutation, useGetAlertQuery, useGetWorkflowsQuery } from '../services/api';
 import Dropdown from '../components/ui/Dropdown';
+import Card from '../components/ui/Card';
 
 const AlertOnboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { id: paramId } = useParams<{ id: string }>();
+  const isViewMode = Boolean(paramId) && window.location.pathname.includes('/view/');
   const alertId = searchParams.get('id');
-  const isEditing = Boolean(alertId);
+  const finalAlertId = paramId || alertId;
+  const isEditing = Boolean(finalAlertId) && !isViewMode;
+  const isViewing = Boolean(finalAlertId) && isViewMode;
   
   const { data: templates = [], isLoading: isLoadingTemplates } = useGetTemplatesQuery();
-  const { data: existingAlert, isLoading: isLoadingAlert } = useGetAlertQuery(alertId!, {
-    skip: !alertId,
+  const { data: existingAlert, isLoading: isLoadingAlert } = useGetAlertQuery(finalAlertId!, {
+    skip: !finalAlertId,
   });
   const { data: workflows = [] } = useGetWorkflowsQuery();
-  const [assignWorkflow] = useAssignWorkflowToFunctionalityMutation();
   const [createAlert, { isLoading: isCreatingAlert }] = useCreateAlertMutation();
   const [updateAlert, { isLoading: isUpdatingAlert }] = useUpdateAlertMutation();
   
@@ -170,21 +174,12 @@ const AlertOnboardPage: React.FC = () => {
       };
       
       if (isEditing) {
-        await updateAlert(alertData).unwrap();
-        //alert('Alert updated successfully!');
+        await updateAlert({ ...alertData, id: finalAlertId }).unwrap();
       } else {
         await createAlert(alertData).unwrap();
-        //alert('Alert onboarded successfully!');
       }
 
-      // Assign workflow if selected
-      if (selectedWorkflow) {
-        await assignWorkflow({
-          workflowId: selectedWorkflow,
-          functionalityId: alertData.id,
-          functionalityType: 'alert',
-        });
-      }
+      alert(isEditing ? 'Alert updated successfully!' : 'Alert onboarded successfully!');
       
       console.log('Alert Data:', JSON.stringify(alertData, null, 2));
       
@@ -202,7 +197,7 @@ const AlertOnboardPage: React.FC = () => {
       navigate('/alerts-dashboard');
     } catch (error) {
       console.error('Failed to create onboard:', error);
-      //alert('Failed to complete onboard. Please try again.');
+      alert('Failed to complete onboard. Please try again.');
     }
   };
 
@@ -221,12 +216,15 @@ const AlertOnboardPage: React.FC = () => {
             handleLoadJira={handleLoadJira}
             onboardFields={onboardFields}
             handleOnboardFieldChange={handleOnboardFieldChange}
+            isViewing={isViewing}
           />
-          <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
-              Next
-            </Button>
-          </div>
+          {!isViewing && (
+            <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       )
     },
@@ -239,15 +237,18 @@ const AlertOnboardPage: React.FC = () => {
             templates={templates}
             selectedTemplates={selectedTemplates}
             handleTemplateSelect={handleTemplateSelect}
+            isViewing={isViewing}
           />
-          <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
-              Back
-            </Button>
-            <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
-              Next
-            </Button>
-          </div>
+          {!isViewing && (
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
+                Back
+              </Button>
+              <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       )
     },
@@ -260,11 +261,17 @@ const AlertOnboardPage: React.FC = () => {
             allFeatures={availableFeatures}
             selectedFeatures={selectedFeatures}
             setSelectedFeatures={setSelectedFeatures}
+            isViewing={isViewing}
           />
           
           <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
             <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-4">
               Workflow Assignment
+              {isViewing && (
+                <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 rounded-full text-xs font-medium">
+                  Read Only
+                </span>
+              )}
             </h3>
             <Dropdown
               label="Assign Workflow (Optional)"
@@ -272,21 +279,23 @@ const AlertOnboardPage: React.FC = () => {
               onChange={setSelectedWorkflow}
               options={workflowOptions}
               placeholder="Select a workflow to assign"
+              disabled={isViewing}
             />
           </Card>
-          <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
-              Back
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleOnboard}
-              className="px-8"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Onboard
-            </Button>
-          </div>
+          {!isViewing && (
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleOnboard}
+                disabled={isCreatingAlert || isUpdatingAlert}
+              >
+                {isCreatingAlert || isUpdatingAlert ? 'Processing...' : isEditing ? 'Update Alert' : 'Onboard Alert'}
+              </Button>
+            </div>
+          )}
         </div>
       )
     },
@@ -297,10 +306,13 @@ const AlertOnboardPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Alert Onboard
+            {isViewing ? 'View Alert Configuration' : isEditing ? 'Edit Alert Onboard' : 'Alert Onboard'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Configure alert onboarding with JIRA integration, template mapping, and feature selection
+            {isViewing 
+              ? 'View alert configuration details (read-only)'
+              : 'Configure alert onboarding with JIRA integration, template mapping, and feature selection'
+            }
           </p>
         </div>
       </div>

@@ -5,7 +5,11 @@ import { Settings, Smartphone } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../hooks/useRedux';
 import { setCurrentTemplate } from '../store/slices/emailEditorSlice';
 
-const PushSmsTemplatePage: React.FC = () => {
+interface PushSmsTemplatePageProps {
+  isViewing?: boolean;
+}
+
+const PushSmsTemplatePage: React.FC<PushSmsTemplatePageProps> = ({ isViewing = false }) => {
   
   const { currentTemplate } = useAppSelector(state => state.emailEditor);
   const dispatch = useAppDispatch();
@@ -21,6 +25,8 @@ const PushSmsTemplatePage: React.FC = () => {
 
   // Memoized handlers to prevent unnecessary re-renders
   const handleContentChange = React.useCallback((value: string) => {
+    if (isViewing) return;
+    
     setContent(prev => ({ ...prev, pushSmsContent: value }));
     if (currentTemplate) {
       dispatch(setCurrentTemplate({ ...currentTemplate, content: value }));
@@ -28,6 +34,8 @@ const PushSmsTemplatePage: React.FC = () => {
   }, [dispatch, currentTemplate]);
 
   const handlePropertyChange = React.useCallback((property: string, value: string) => {
+    if (isViewing) return;
+    
     setProperties(prev => ({ ...prev, [property]: value }));
   }, []);
   
@@ -42,6 +50,11 @@ const PushSmsTemplatePage: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Push/SMS Content
                 </h3>
+                {isViewing && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs font-medium">
+                    Read Only
+                  </span>
+                )}
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -51,8 +64,11 @@ const PushSmsTemplatePage: React.FC = () => {
                   <textarea
                     value={content.pushSmsContent}
                     onChange={(e) => handleContentChange(e.target.value)}
+                    disabled={isViewing}
                     rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white ${
+                      isViewing ? 'cursor-not-allowed opacity-75' : ''
+                    }`}
                     placeholder="Enter your Push/SMS message content here..."
                   />
                   <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
@@ -118,22 +134,30 @@ const PushSmsTemplatePage: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Properties Panel
                 </h3>
+                {isViewing && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 rounded-full text-xs font-medium">
+                    Read Only
+                  </span>
+                )}
               </div>
               <div className="space-y-4">
                 <InputField
                   label="Property 1"
                   value={properties.prop1}
                   onChange={(value) => handlePropertyChange('prop1', value)}
+                  disabled={isViewing}
                 />
                 <InputField
                   label="Property 2"
                   value={properties.prop2}
                   onChange={(value) => handlePropertyChange('prop2', value)}
+                  disabled={isViewing}
                 />
                 <InputField
                   label="Property 3"
                   value={properties.prop3}
                   onChange={(value) => handlePropertyChange('prop3', value)}
+                  disabled={isViewing}
                 />
               </div>
             </Card>
@@ -145,19 +169,25 @@ const PushSmsTemplatePage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Push Notifications</span>
-                  <div className="w-10 h-6 bg-blue-500 rounded-full flex items-center justify-end px-1">
+                  <div className={`w-10 h-6 bg-blue-500 rounded-full flex items-center justify-end px-1 ${
+                    isViewing ? 'opacity-75' : ''
+                  }`}>
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">SMS Delivery</span>
-                  <div className="w-10 h-6 bg-blue-500 rounded-full flex items-center justify-end px-1">
+                  <div className={`w-10 h-6 bg-blue-500 rounded-full flex items-center justify-end px-1 ${
+                    isViewing ? 'opacity-75' : ''
+                  }`}>
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Immediate Send</span>
-                  <div className="w-10 h-6 bg-gray-300 rounded-full flex items-center justify-start px-1">
+                  <div className={`w-10 h-6 bg-gray-300 rounded-full flex items-center justify-start px-1 ${
+                    isViewing ? 'opacity-75' : ''
+                  }`}>
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
                 </div>

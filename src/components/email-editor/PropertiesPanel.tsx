@@ -11,7 +11,11 @@ import { Trash2, Settings, Maximize2, X } from 'lucide-react';
 import { ConditionBuilder } from './ConditionBuilder';
 import ContentEditor from './ContentEditor';
 
-const PropertiesPanel: React.FC = () => {
+interface PropertiesPanelProps {
+  isViewing?: boolean;
+}
+
+const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ isViewing = false }) => {
   const dispatch = useAppDispatch();
   const { selectedComponent } = useAppSelector((state) => state.emailEditor);
   const { currentTemplate } = useAppSelector((state) => state.emailEditor);
@@ -29,7 +33,10 @@ const PropertiesPanel: React.FC = () => {
           Properties Panel
         </h3>
         <p className="text-gray-500 dark:text-gray-400">
-          Select a widget or component to edit its properties
+          {isViewing 
+            ? 'Select a widget or component to view its properties'
+            : 'Select a widget or component to edit its properties'
+          }
         </p>
       </div>
     );
@@ -38,6 +45,8 @@ const PropertiesPanel: React.FC = () => {
   const isWidget = 'components' in selectedComponent;
 
   const handleContentChange = (content: string) => {
+    if (isViewing) return;
+    
     if (!isWidget && selectedComponent?.id) {
       dispatch(updateComponent({
         id: selectedComponent.id,
@@ -47,6 +56,8 @@ const PropertiesPanel: React.FC = () => {
   };
 
   const handleDelete = () => {
+    if (isViewing) return;
+    
     if (isWidget) {
       dispatch(removeWidget(selectedComponent.id));
     } else {
@@ -61,11 +72,13 @@ const PropertiesPanel: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Component Properties
+          {isViewing ? 'Component Properties (Read Only)' : 'Component Properties'}
         </h3>
-        <Button variant="danger" size="sm" onClick={handleDelete}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {!isViewing && (
+          <Button variant="danger" size="sm" onClick={handleDelete}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       <div className="space-y-4">
@@ -84,7 +97,7 @@ const PropertiesPanel: React.FC = () => {
           </label>
 
           <div className="relative">
-            {isFullScreen && (
+            {isFullScreen && !isViewing && (
               <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-end justify-center">
                 <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-t-2xl shadow-xl transform transition-all duration-300 animate-slide-up flex flex-col p-4 m-4">
                   {/* Tray Header */}
@@ -114,25 +127,27 @@ const PropertiesPanel: React.FC = () => {
 
             {!isFullScreen && (
               <div className="relative border rounded-md pt-10">
-            <div className="absolute top-2 right-2 z-10">
-              <button
-                onClick={() => setIsFullScreen(true)}
-                className="bg-white dark:bg-gray-800 rounded-full p-1 shadow hover:text-blue-600 text-gray-500"
-                title="Expand Editor"
-              >
-                <Maximize2 className="w-5 h-5" />
-              </button>
-            </div>
-            <ContentEditor
-              value={selectedComponent.content}
-              onChange={handleContentChange}
-            />
-          </div>
+                {!isViewing && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <button
+                      onClick={() => setIsFullScreen(true)}
+                      className="bg-white dark:bg-gray-800 rounded-full p-1 shadow hover:text-blue-600 text-gray-500"
+                      title="Expand Editor"
+                    >
+                      <Maximize2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+                <ContentEditor
+                  value={selectedComponent.content}
+                  onChange={handleContentChange}
+                />
+              </div>
             )}
           </div>
         </div>
 
-        {componentType === 'Conditions' && (
+        {componentType === 'Conditions' && !isViewing && (
           <>
             <Button onClick={() => setShowConditionModal(true)} variant="outline">
               Add Condition
@@ -177,6 +192,14 @@ const PropertiesPanel: React.FC = () => {
               </div>
             )}
           </>
+        )}
+        
+        {isViewing && (
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>View Mode:</strong> This template is in read-only mode. Use the Edit button to make changes.
+            </p>
+          </div>
         )}
       </div>
     </div>

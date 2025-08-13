@@ -14,13 +14,21 @@ import AlertOnboardPage from './pages/AlertOnboardPage';
 import NotificationTestPage from './pages/NotificationTestPage';
 import NotificationTestExecutePage from './pages/NotificationTestExecutePage';
 import WorkflowDashboardPage from './pages/WorkflowDashboardPage';
-import WorkflowCreatePage from './pages/WorkflowCreatePage';
 import WorkflowExecutePage from './pages/WorkflowExecutePage';
-import TaskManagementPage from './pages/TaskManagementPage';
-import TaskCreatePage from './pages/TaskCreatePage';
+import WorkflowActionDashboard from './pages/WorkflowActionDashboard';
+import ActivitiesDashboardPage from './pages/ActivitiesDashboardPage';
 import RbacUsersPage from './pages/RbacUsersPage';
 import RbacRolesPage from './pages/RbacRolesPage';
 import RbacPermissionsPage from './pages/RbacPermissionsPage';
+import WorkflowBuilderPage from './pages/WorkflowBuilderPage';
+import WorkflowListPage from './pages/WorkflowListPage';
+import WorkflowMappingPage from './pages/WorkflowMappingPage';
+import WorkflowExecutionPage from './pages/WorkflowExecutionPage';
+import ApprovalsPage from './pages/ApprovalsPage';
+import WorkflowDemoPage from './pages/WorkflowDemoPage';
+import TaskManagementPage from './pages/TaskManagementPage';
+import TaskCreatePage from './pages/TaskCreatePage';
+import { ToastProvider } from './context/ToastContext';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated } = useAppSelector(state => state.auth);
@@ -75,6 +83,16 @@ const AppContent: React.FC = () => {
             }
           />
           <Route
+            path="/templates/view/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CreateTemplatePage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/alerts-dashboard"
             element={
               <ProtectedRoute>
@@ -86,6 +104,16 @@ const AppContent: React.FC = () => {
           />
           <Route
             path="/alert-onboard"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AlertOnboardPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alert-onboard/view/:id"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -115,7 +143,7 @@ const AppContent: React.FC = () => {
             }
           />
           <Route
-            path="/workflows"
+            path="/workflows/admin"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -125,11 +153,101 @@ const AppContent: React.FC = () => {
             }
           />
           <Route
-            path="/workflows/create"
+            path="/activities"
             element={
               <ProtectedRoute>
                 <Layout>
-                  <WorkflowCreatePage />
+                  <ActivitiesDashboardPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowListPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/builder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowBuilderPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/builder/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowBuilderPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/mapping"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowMappingPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/execution/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowExecutionPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/preview/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowExecutionPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/view/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowDemoPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/approvals"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ApprovalsPage full={true} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows/actions"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkflowActionDashboard />
                 </Layout>
               </ProtectedRoute>
             }
@@ -140,6 +258,16 @@ const AppContent: React.FC = () => {
               <ProtectedRoute>
                 <Layout>
                   <WorkflowExecutePage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rbac/users"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <RbacUsersPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -165,11 +293,11 @@ const AppContent: React.FC = () => {
             }
           />
           <Route
-            path="/rbac/users"
+            path="/tasks/view/:id"
             element={
               <ProtectedRoute>
                 <Layout>
-                  <RbacUsersPage />
+                  <TaskCreatePage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -204,7 +332,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </Provider>
   );
 }

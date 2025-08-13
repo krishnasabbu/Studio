@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertTriangle,
-  GitBranch
+  GitBranch,
+  UserCheck
 } from 'lucide-react';
 import { Boxes } from 'lucide-react';
 
@@ -31,7 +32,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     { path: '/templates/create', label: 'Notification Template Creation', icon: Plus, permission: 'create' },
     { path: '/templates/push-sms', label: 'New Push/SMS Template', icon: Smartphone, permission: 'create' },
     { path: '/alerts-dashboard', label: 'Alert Onboard', icon: FileText, permission: 'read' },
-    { path: '/workflows', label: 'Workflow Admin', icon: GitBranch, permission: 'read' },
+    { path: '/workflows', label: 'Workflows', icon: GitBranch, permission: 'read' },
+    { path: '/workflows/builder', label: 'Workflow Builder', icon: GitBranch, permission: 'create' },
+    { path: '/workflows/view', label: 'Workflow Demo', icon: GitBranch, permission: 'read' },
+    { path: '/workflows/mapping', label: 'Workflow Mapping', icon: GitBranch, permission: 'create' },
+    { path: '/approvals', label: 'Pending Approvals', icon: UserCheck, permission: 'read' },
+    { path: '/workflows/admin', label: 'Workflow Dashboard', icon: GitBranch, permission: 'read' },
+    { path: '/activities', label: 'Activities Dashboard', icon: Boxes, permission: 'read' },
+    { path: '/workflows/actions', label: 'Workflow Actions', icon: GitBranch, permission: 'read' },
     { path: '/tasks', label: 'Task Management', icon: FileText, permission: 'read' },
     { path: '/tests', label: 'Notification Test', icon: TestTube, permission: 'read' },
     { path: '/rbac/users', label: 'RBAC > Users', icon: Users, permission: 'read' },

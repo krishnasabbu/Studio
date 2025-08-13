@@ -219,43 +219,91 @@ export const api = createApi({
 
     // Workflow endpoints
     getWorkflows: builder.query<any[], void>({
-      query: () => '/workflows',
+      query: () => {
+        // Use Spring Boot API
+        const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080/api';
+        return {
+          url: `${baseUrl}/workflows`,
+          method: 'GET',
+        };
+      },
       providesTags: ['Workflow'],
     }),
     getWorkflow: builder.query<any, string>({
-      query: (id) => `/workflows/${id}`,
+      query: (id) => {
+        const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080/api';
+        return {
+          url: `${baseUrl}/workflows/${id}`,
+          method: 'GET',
+        };
+      },
       providesTags: ['Workflow'],
     }),
     createWorkflow: builder.mutation<any, any>({
-      query: (workflow) => ({
-        url: '/workflows',
-        method: 'POST',
-        body: {
-          ...workflow,
-          id: Date.now().toString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      }),
+      query: (workflow) => {
+        const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080/api';
+        return {
+          url: `${baseUrl}/workflows`,
+          method: 'POST',
+          body: workflow,
+        };
+      },
       invalidatesTags: ['Workflow'],
     }),
     updateWorkflow: builder.mutation<any, any>({
-      query: (workflow) => ({
-        url: `/workflows/${workflow.id}`,
-        method: 'PUT',
-        body: {
-          ...workflow,
-          updatedAt: new Date().toISOString(),
-        },
-      }),
+      query: (workflow) => {
+        const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080/api';
+        return {
+          url: `${baseUrl}/workflows/${workflow.id}`,
+          method: 'PUT',
+          body: workflow,
+        };
+      },
       invalidatesTags: ['Workflow'],
     }),
     deleteWorkflow: builder.mutation<void, string>({
+      query: (id) => {
+        const baseUrl = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8080/api';
+        return {
+          url: `${baseUrl}/workflows/${id}`,
+          method: 'DELETE',
+        };
+      },
+      invalidatesTags: ['Workflow'],
+    }),
+    getActivities: builder.query<any[], string>({
+      query: (workflowId) => workflowId === 'all' ? '/activities' : `/activities?workflowId=${workflowId}`,
+      providesTags: ['Activity'],
+    }),
+    createActivity: builder.mutation<any, any>({
+      query: (activity) => ({
+        url: '/activities',
+        method: 'POST',
+        body: {
+          ...activity,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString(),
+        },
+      }),
+      invalidatesTags: ['Activity'],
+    }),
+    updateActivity: builder.mutation<any, any>({
+      query: (activity) => ({
+        url: `/activities/${activity.id}`,
+        method: 'PUT',
+        body: {
+          ...activity,
+          updatedAt: new Date().toISOString(),
+        },
+      }),
+      invalidatesTags: ['Activity'],
+    }),
+    deleteActivity: builder.mutation<void, string>({
       query: (id) => ({
-        url: `/workflows/${id}`,
+        url: `/activities/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Workflow'],
+      invalidatesTags: ['Activity'],
     }),
     assignWorkflowToFunctionality: builder.mutation<any, { workflowId: string; functionalityId: string; functionalityType: string }>({
       query: ({ workflowId, functionalityId, functionalityType }) => ({
@@ -375,10 +423,81 @@ export const api = createApi({
       }),
       invalidatesTags: ['WorkflowInstance'],
     }),
+
+    // Alert workflow endpoints
+    getWorkflowMappings: builder.query<any[], void>({
+      query: () => '/workflowMappings',
+      providesTags: ['WorkflowMapping'],
+    }),
+    createWorkflowMapping: builder.mutation<any, any>({
+      query: (mapping) => ({
+        url: '/workflowMappings',
+        method: 'POST',
+        body: {
+          ...mapping,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString(),
+        },
+      }),
+      invalidatesTags: ['WorkflowMapping'],
+    }),
+    deleteWorkflowMapping: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/workflowMappings/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['WorkflowMapping'],
+    }),
+
+    // Alert execution endpoints
+    getAlertExecutions: builder.query<any[], void>({
+      query: () => '/alertExecutions',
+      providesTags: ['AlertExecution'],
+    }),
+    createAlertExecution: builder.mutation<any, any>({
+      query: (execution) => ({
+        url: '/alertExecutions',
+        method: 'POST',
+        body: {
+          ...execution,
+          id: Date.now().toString(),
+          startedAt: new Date().toISOString(),
+        },
+      }),
+      invalidatesTags: ['AlertExecution'],
+    }),
+    approveAlertStep: builder.mutation<any, { executionId: string; stepId: string; comments?: string }>({
+      query: ({ executionId, stepId, comments }) => ({
+        url: `/alertExecutions/${executionId}/approve`,
+        method: 'POST',
+        body: { 
+          stepId, 
+          comments, 
+          timestamp: new Date().toISOString(),
+          approvedBy: 'current.user@company.com'
+        },
+      }),
+      invalidatesTags: ['AlertExecution'],
+    }),
+    rejectAlertStep: builder.mutation<any, { executionId: string; stepId: string; comments?: string }>({
+      query: ({ executionId, stepId, comments }) => ({
+        url: `/alertExecutions/${executionId}/reject`,
+        method: 'POST',
+        body: { 
+          stepId, 
+          comments, 
+          timestamp: new Date().toISOString(),
+          rejectedBy: 'current.user@company.com'
+        },
+      }),
+      invalidatesTags: ['AlertExecution'],
+    }),
   }),
 });
 
 export const {
+  useGetNodesQuery,
+  useCreateNodeMutation,
   useGetTemplatesQuery,
   useGetTemplateQuery,
   useCreateTemplateMutation,
@@ -409,6 +528,10 @@ export const {
   useCreateWorkflowMutation,
   useUpdateWorkflowMutation,
   useDeleteWorkflowMutation,
+  useGetActivitiesQuery,
+  useCreateActivityMutation,
+  useUpdateActivityMutation,
+  useDeleteActivityMutation,
   useAssignWorkflowToFunctionalityMutation,
   useExecuteWorkflowMutation,
   useGetWorkflowExecutionsQuery,
@@ -423,4 +546,11 @@ export const {
   useUpdateWorkflowInstanceMutation,
   useApproveWorkflowStepMutation,
   useRejectWorkflowStepMutation,
+  useGetWorkflowMappingsQuery,
+  useCreateWorkflowMappingMutation,
+  useDeleteWorkflowMappingMutation,
+  useGetAlertExecutionsQuery,
+  useCreateAlertExecutionMutation,
+  useApproveAlertStepMutation,
+  useRejectAlertStepMutation,
 } = api;

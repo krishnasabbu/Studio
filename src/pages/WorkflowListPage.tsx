@@ -1,71 +1,91 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetAlertsQuery, useDeleteAlertMutation } from '../services/api';
-import { usePermissions } from '../hooks/useRedux';
+import { useWorkflowStore } from '../store/workflowStore';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { Plus, Edit, Trash2, AlertTriangle, Calendar, FileText, Search, Filter, Grid, List, Eye } from 'lucide-react';
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Play, 
+  GitBranch, 
+  Calendar, 
+  User, 
+  Eye,
+  Search,
+  Filter,
+  Grid,
+  List
+} from 'lucide-react';
 
-const AlertsDashboardPage: React.FC = () => {
+const WorkflowListPage: React.FC = () => {
   const navigate = useNavigate();
-  const { hasPermission } = usePermissions();
   
-  const { data: alerts = [], isLoading, error } = useGetAlertsQuery();
-  const [deleteAlert] = useDeleteAlertMutation();
+  const {
+    workflows,
+    isLoading,
+    error,
+    fetchWorkflows,
+    deleteWorkflow,
+  } = useWorkflowStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 6;
 
-  const handleDelete = async (alertId: string) => {
-    if (confirm('Are you sure you want to delete this alert?')) {
+  useEffect(() => {
+    fetchWorkflows();
+  }, [fetchWorkflows]);
+
+  const handleDelete = async (workflowId: string) => {
+    if (confirm('Are you sure you want to delete this workflow?')) {
       try {
-        await deleteAlert(alertId).unwrap();
+        await deleteWorkflow(workflowId);
+        alert('Workflow deleted successfully!');
       } catch (error) {
-        console.error('Failed to delete alert:', error);
-        alert('Failed to delete alert. Please try again.');
+        console.error('Failed to delete workflow:', error);
+        alert('Failed to delete workflow. Please try again.');
       }
     }
   };
 
-  const handleEdit = (alertId: string) => {
-    navigate(`/alert-onboard?id=${alertId}`);
-  };
-
-  const handleView = (alertId: string) => {
-    navigate(`/alert-onboard/view/${alertId}`);
+  const handleExecute = async (workflowId: string) => {
+    // Navigate to execution page for demo purposes
+    navigate(`/workflows/execution/${workflowId}`);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Published':
+      case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'Draft':
+      case 'draft':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   // Filter and search logic
-  const filteredAlerts = alerts.filter(alert => {
-    const matchesSearch = (alert.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (alert.jiraId || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || alert.status === statusFilter;
+  const filteredWorkflows = workflows.filter(workflow => {
+    const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || workflow.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredAlerts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredWorkflows.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedAlerts = filteredAlerts.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedWorkflows = filteredWorkflows.slice(startIndex, startIndex + itemsPerPage);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -73,29 +93,30 @@ const AlertsDashboardPage: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-red-500 mb-4">Failed to load alerts</div>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <div className="text-red-500 mb-4">{error}</div>
+        <Button onClick={() => fetchWorkflows()}>Retry</Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Alerts Dashboard
+          <h1 className="text-3xl font-bold text-primary-700 dark:text-white">
+            Workflow Management
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your alert configurations and onboarding
+            Create, manage, and execute your workflows
           </p>
         </div>
-        {hasPermission('create') && (
-          <Button onClick={() => navigate('/alert-onboard')} className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
-            <Plus className="h-5 w-5 mr-2" />
-            New Alert Onboard
-          </Button>
-        )}
+        <Button 
+          onClick={() => navigate('/workflows/builder')}
+          className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Create Workflow
+        </Button>
       </div>
 
       {/* Search and Filter Bar */}
@@ -106,7 +127,7 @@ const AlertsDashboardPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search alerts..."
+                placeholder="Search workflows..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 dark:text-white"
@@ -120,8 +141,9 @@ const AlertsDashboardPage: React.FC = () => {
                 className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 dark:text-white"
               >
                 <option value="">All Status</option>
-                <option value="Published">Published</option>
-                <option value="Draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
@@ -148,78 +170,97 @@ const AlertsDashboardPage: React.FC = () => {
 
       {/* Content */}
       {viewMode === 'card' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          {paginatedAlerts.map((alert) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedWorkflows.map((workflow) => (
             <Card 
-              key={alert.id} 
-              className="p-3 hover:shadow-xl transition-all duration-300 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
+              key={workflow.id} 
+              className="p-6 hover:shadow-xl transition-all duration-300 bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center space-x-2 min-w-0 flex-1">
-                  <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-xs truncate">
-                      {alert.name || 'Unnamed Alert'}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <GitBranch className="h-6 w-6 text-primary-500" />
+                  <div>
+                    <h3 className="font-semibold text-primary-700 dark:text-white">
+                      {workflow.name}
                     </h3>
-                    {alert.jiraId && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {alert.jiraId}
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      v{workflow.version}
+                    </p>
                   </div>
                 </div>
-                <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(alert.status)}`}>
-                  {alert.status}
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}>
+                  {workflow.status.charAt(0).toUpperCase() + workflow.status.slice(1)}
                 </span>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Templates:</span>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {workflow.description}
+                </p>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Nodes:</span>
                   <span className="text-gray-900 dark:text-white font-medium">
-                    {alert.selectedTemplates?.length || 0}
+                    {workflow.nodes?.length || 0}
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Features:</span>
-                  <span className="text-gray-900 dark:text-white font-medium">
-                    {alert.selectedFeatures?.length || 0}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Created:</span>
+                  <span className="text-gray-900 dark:text-white flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {new Date(workflow.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Created By:</span>
+                  <span className="text-gray-900 dark:text-white flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    {workflow.createdBy.split('@')[0]}
                   </span>
                 </div>
               </div>
 
-              <div className="flex space-x-1 mt-3">
+              <div className="flex space-x-2 mt-6">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleView(alert.id)}
-                  className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50 text-xs py-1 px-2"
+                  onClick={() => navigate(`/workflows/preview/${workflow.id}`)}
+                  className="flex-1"
                 >
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Eye className="h-4 w-4 mr-2" />
                   View
                 </Button>
-                {hasPermission('update') && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(alert.id)}
-                    className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50 text-xs py-1 px-2"
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                )}
-                {hasPermission('delete') && (
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(alert.id)}
-                    className="px-2 py-1"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                )}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/workflows/builder/${workflow.id}`)}
+                  className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleExecute(workflow.id)}
+                  className="flex-1 bg-accent-600 hover:bg-accent-700 text-white"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Execute
+                </Button>
+                
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(workflow.id)}
+                  className="px-3"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </Card>
           ))}
@@ -231,19 +272,19 @@ const AlertsDashboardPage: React.FC = () => {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                    Alert Name
+                    Workflow Name
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                    JIRA ID
+                    Version
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
                     Status
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                    Templates
+                    Nodes
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
-                    Features
+                    Created By
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">
                     Created
@@ -254,60 +295,67 @@ const AlertsDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedAlerts.map((alert) => (
+                {paginatedWorkflows.map((workflow) => (
                   <tr
-                    key={alert.id}
+                    key={workflow.id}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-primary-50 dark:hover:bg-gray-800/50 transition-all duration-200"
                   >
                     <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">
-                      {alert.name || 'Unnamed Alert'}
+                      {workflow.name}
                     </td>
                     <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                      {alert.jiraId || 'N/A'}
+                      v{workflow.version}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(alert.status)}`}>
-                        {alert.status}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}>
+                        {workflow.status.charAt(0).toUpperCase() + workflow.status.slice(1)}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                      {alert.selectedTemplates?.length || 0}
+                      {workflow.nodes?.length || 0}
                     </td>
                     <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                      {alert.selectedFeatures?.length || 0}
+                      {workflow.createdBy.split('@')[0]}
                     </td>
                     <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                      {new Date(alert.createdAt).toLocaleDateString()}
+                      {new Date(workflow.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleView(alert.id)}
-                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                          onClick={() => navigate(`/workflows/preview/${workflow.id}`)}
+                          className="border-primary-300 text-primary-600 hover:bg-primary-50"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {hasPermission('update') && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(alert.id)}
-                            className="border-primary-300 text-primary-600 hover:bg-primary-50"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {hasPermission('delete') && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => handleDelete(alert.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/workflows/builder/${workflow.id}`)}
+                          className="border-primary-300 text-primary-600 hover:bg-primary-50"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleExecute(workflow.id)}
+                          className="bg-accent-600 hover:bg-accent-700 text-white"
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(workflow.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -323,7 +371,7 @@ const AlertsDashboardPage: React.FC = () => {
         <Card className="p-4 bg-white hover:shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700 dark:text-gray-300">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredAlerts.length)} of {filteredAlerts.length} alerts
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredWorkflows.length)} of {filteredWorkflows.length} workflows
             </div>
             <div className="flex space-x-2">
               <Button
@@ -360,24 +408,28 @@ const AlertsDashboardPage: React.FC = () => {
         </Card>
       )}
 
-      {filteredAlerts.length === 0 && (
+      {/* Empty State */}
+      {filteredWorkflows.length === 0 && (
         <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-            <AlertTriangle className="h-8 w-8 text-gray-400" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full mb-4">
+            <GitBranch className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {searchTerm || statusFilter ? 'No alerts found' : 'No alerts configured yet'}
+            {searchTerm || statusFilter ? 'No workflows found' : 'No workflows yet'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             {searchTerm || statusFilter 
               ? 'Try adjusting your search or filter criteria'
-              : 'Create your first alert configuration to get started'
+              : 'Create your first workflow to automate your processes'
             }
           </p>
-          {hasPermission('create') && !searchTerm && !statusFilter && (
-            <Button onClick={() => navigate('/alert-onboard')}>
+          {!searchTerm && !statusFilter && (
+            <Button 
+              onClick={() => navigate('/workflows/builder')}
+              className="bg-primary-600 hover:bg-primary-700 text-white"
+            >
               <Plus className="h-5 w-5 mr-2" />
-              New Alert Onboard
+              Create Workflow
             </Button>
           )}
         </div>
@@ -386,4 +438,4 @@ const AlertsDashboardPage: React.FC = () => {
   );
 };
 
-export default AlertsDashboardPage;
+export default WorkflowListPage;

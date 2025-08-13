@@ -41,7 +41,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             disabled
               ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed'
               : 'bg-white dark:bg-gray-700'
-          } dark:text-white`}
+          }`}
         >
           {placeholder && (
             <option value="" disabled>

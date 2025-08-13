@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetTasksQuery, useDeleteTaskMutation, useGetWorkflowsQuery } from '../services/api';
+import { useGetWorkflowsQuery } from '../services/api'; // Keep this if still using RTK for workflows
 import { usePermissions } from '../hooks/useRedux';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Plus, Edit, Trash2, FileText, Calendar, User, Eye, Search, Filter, Grid, List } from 'lucide-react';
 
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  releaseNumber: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  assignedWorkflow: string;
+  createdBy: string;
+  createdAt: string;
+}
+
 const TaskManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
-  
-  const { data: tasks = [], isLoading, error } = useGetTasksQuery();
+
+  // Replace RTK Query with local state
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Keep using RTK Query for workflows (or update similarly if needed)
   const { data: workflows = [] } = useGetWorkflowsQuery();
-  const [deleteTask] = useDeleteTaskMutation();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -20,14 +35,61 @@ const TaskManagementPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const handleDelete = async (taskId: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
+  // Fetch tasks from third-party API
+  useEffect(() => {
+    const fetchTasks = async () => {
       try {
-        await deleteTask(taskId).unwrap();
-      } catch (error) {
-        console.error('Failed to delete task:', error);
-        alert('Failed to delete task. Please try again.');
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch('http://localhost:8080/api/tasks', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Add auth token if required, e.g.:
+            // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.status}`);
+        }
+
+        const data: Task[] = await response.json();
+        setTasks(data);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        setError((err as Error).message || 'Unknown error');
+      } finally {
+        setIsLoading(false);
       }
+    };
+
+    fetchTasks();
+  }, []);
+
+  // Delete task (assuming backend supports DELETE)
+  const handleDelete = async (taskId: string) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+
+      // Update local state
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      alert('Task deleted successfully!');
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('Failed to delete task. Please try again.');
     }
   };
 
@@ -55,14 +117,15 @@ const TaskManagementPage: React.FC = () => {
   };
 
   const getWorkflowName = (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
+    const workflow = workflows.find((w) => w.id === workflowId);
     return workflow?.name || 'No Workflow';
   };
 
   // Filter and search logic
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.releaseNumber.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.releaseNumber.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || task.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -83,43 +146,42 @@ const TaskManagementPage: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-red-500 mb-4">Failed to load tasks</div>
+        <div className="text-red-500 mb-4">Failed to load tasks: {error}</div>
         <Button onClick={() => window.location.reload()}>Retry</Button>
       </div>
     );
   }
 
-  const TaskCard = ({ task }: { task: any }) => (
-    <Card className="p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500">
+  const TaskCard = ({ task }: { task: Task }) => (
+    <Card
+      className="p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
+    >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <FileText className="h-6 w-6 text-primary-500" />
           <div>
-            <h3 className="font-semibold text-primary-700 dark:text-white">
-              {task.title}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {task.releaseNumber}
-            </p>
+            <h3 className="font-semibold text-primary-700 dark:text-white">{task.title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{task.releaseNumber}</p>
           </div>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-          {task.status.replace('_', ' ').charAt(0).toUpperCase() + task.status.replace('_', ' ').slice(1)}
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}
+        >
+          {task.status.replace('_', ' ').charAt(0).toUpperCase() +
+            task.status.replace('_', ' ').slice(1)}
         </span>
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {task.description}
-        </p>
-        
+        <p className="text-sm text-gray-600 dark:text-gray-300">{task.description}</p>
+
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 dark:text-gray-400">Workflow:</span>
           <span className="text-gray-900 dark:text-white font-medium">
             {getWorkflowName(task.assignedWorkflow)}
           </span>
         </div>
-        
+
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 dark:text-gray-400">Created:</span>
           <span className="text-gray-900 dark:text-white flex items-center">
@@ -147,7 +209,7 @@ const TaskManagementPage: React.FC = () => {
           <Eye className="h-4 w-4 mr-2" />
           View
         </Button>
-        
+
         {hasPermission('update') && (
           <Button
             variant="outline"
@@ -159,7 +221,7 @@ const TaskManagementPage: React.FC = () => {
             Edit
           </Button>
         )}
-        
+
         {hasPermission('delete') && (
           <Button
             variant="danger"
@@ -212,12 +274,15 @@ const TaskManagementPage: React.FC = () => {
                 <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">
                   {task.releaseNumber}
                 </td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                  {task.title}
-                </td>
+                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{task.title}</td>
                 <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                    {task.status.replace('_', ' ').charAt(0).toUpperCase() + task.status.replace('_', ' ').slice(1)}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      task.status
+                    )}`}
+                  >
+                    {task.status.replace('_', ' ').charAt(0).toUpperCase() +
+                      task.status.replace('_', ' ').slice(1)}
                   </span>
                 </td>
                 <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
@@ -280,7 +345,7 @@ const TaskManagementPage: React.FC = () => {
           </p>
         </div>
         {hasPermission('create') && (
-          <Button 
+          <Button
             onClick={() => navigate('/tasks/create')}
             className="bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
           >
@@ -324,7 +389,11 @@ const TaskManagementPage: React.FC = () => {
               variant={viewMode === 'card' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setViewMode('card')}
-              className={viewMode === 'card' ? 'bg-primary-600 text-white' : 'border-primary-300 text-primary-600 hover:bg-primary-50'}
+              className={
+                viewMode === 'card'
+                  ? 'bg-primary-600 text-white'
+                  : 'border-primary-300 text-primary-600 hover:bg-primary-50'
+              }
             >
               <Grid className="h-4 w-4" />
             </Button>
@@ -332,7 +401,11 @@ const TaskManagementPage: React.FC = () => {
               variant={viewMode === 'table' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setViewMode('table')}
-              className={viewMode === 'table' ? 'bg-primary-600 text-white' : 'border-primary-300 text-primary-600 hover:bg-primary-50'}
+              className={
+                viewMode === 'table'
+                  ? 'bg-primary-600 text-white'
+                  : 'border-primary-300 text-primary-600 hover:bg-primary-50'
+              }
             >
               <List className="h-4 w-4" />
             </Button>
@@ -356,25 +429,30 @@ const TaskManagementPage: React.FC = () => {
         <Card className="p-4 bg-white hover:shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700 dark:text-gray-300">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTasks.length)} of {filteredTasks.length} tasks
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTasks.length)} of{' '}
+              {filteredTasks.length} tasks
             </div>
             <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="border-primary-300 text-primary-600 hover:bg-primary-50"
               >
                 Previous
               </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <Button
                   key={page}
                   variant={currentPage === page ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setCurrentPage(page)}
-                  className={currentPage === page ? 'bg-primary-600 text-white' : 'border-primary-300 text-primary-600 hover:bg-primary-50'}
+                  className={
+                    currentPage === page
+                      ? 'bg-primary-600 text-white'
+                      : 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                  }
                 >
                   {page}
                 </Button>
@@ -382,7 +460,7 @@ const TaskManagementPage: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 className="border-primary-300 text-primary-600 hover:bg-primary-50"
               >
@@ -402,13 +480,12 @@ const TaskManagementPage: React.FC = () => {
             {searchTerm || statusFilter ? 'No tasks found' : 'No tasks yet'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {searchTerm || statusFilter 
+            {searchTerm || statusFilter
               ? 'Try adjusting your search or filter criteria'
-              : 'Create your first task to get started'
-            }
+              : 'Create your first task to get started'}
           </p>
           {hasPermission('create') && !searchTerm && !statusFilter && (
-            <Button 
+            <Button
               onClick={() => navigate('/tasks/create')}
               className="bg-primary-600 hover:bg-primary-700 text-white"
             >

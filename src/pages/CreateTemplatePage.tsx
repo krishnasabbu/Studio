@@ -26,6 +26,7 @@ const CreateTemplatePage: React.FC = () => {
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('creation');
   const [isEditing, setIsEditing] = useState(false);
+  const [isViewing, setIsViewing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [enabledTabs, setEnabledTabs] = useState<string[]>(['creation']);
@@ -52,9 +53,25 @@ const CreateTemplatePage: React.FC = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
+    const isViewMode = window.location.pathname.includes('/view/');
+    
     if (id) {
       setTemplateId(id);
-      setIsEditing(true);
+      if (isViewMode) {
+        setIsViewing(true);
+        setIsEditing(false);
+      } else {
+        setIsEditing(true);
+        setIsViewing(false);
+      }
+    } else if (window.location.pathname.includes('/view/')) {
+      const pathParts = window.location.pathname.split('/');
+      const viewId = pathParts[pathParts.length - 1];
+      if (viewId) {
+        setTemplateId(viewId);
+        setIsViewing(true);
+        setIsEditing(false);
+      }
     }
   }, []);
 
@@ -73,6 +90,8 @@ const CreateTemplatePage: React.FC = () => {
   }, [existingTemplate, dispatch]);
 
   const validateForm = () => {
+    if (isViewing) return true; // Skip validation in view mode
+    
     const newErrors: Record<string, string> = {};
     if (!formData.messageTypeId.trim())
       newErrors.messageTypeId = 'Message Type ID is required';
@@ -86,6 +105,8 @@ const CreateTemplatePage: React.FC = () => {
 
   const handleNextFromCreation = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isViewing) return;
+    
     if (!validateForm()) return;
 
     const templateData = {
@@ -112,6 +133,8 @@ const CreateTemplatePage: React.FC = () => {
   };
 
   const handleNextFromVariables = () => {
+    if (isViewing) return;
+    
     dispatch(
       setCurrentTemplate({
         ...currentTemplate!,
@@ -127,6 +150,8 @@ const CreateTemplatePage: React.FC = () => {
   };
 
   const handleSaveTemplate = async () => {
+    if (isViewing) return;
+    
     if (currentTemplate) {
       try {
         const updatedTemplate = {
@@ -149,6 +174,8 @@ const CreateTemplatePage: React.FC = () => {
   };
 
   const handleAddVariable = () => {
+    if (isViewing) return;
+    
     setDynamicVariables((prev) => [
       ...prev,
       { id: uuidv4(), variableName: '', formatter: '' },
@@ -156,6 +183,8 @@ const CreateTemplatePage: React.FC = () => {
   };
 
   const handleRemoveVariable = (id: string) => {
+    if (isViewing) return;
+    
     setDynamicVariables((prev) => prev.filter((v) => v.id !== id));
   };
 
@@ -164,6 +193,8 @@ const CreateTemplatePage: React.FC = () => {
     field: 'variableName' | 'formatter',
     value: string
   ) => {
+    if (isViewing) return;
+    
     setDynamicVariables((prev) =>
       prev.map((v) => (v.id === id ? { ...v, [field]: value } : v))
     );
@@ -185,6 +216,7 @@ const CreateTemplatePage: React.FC = () => {
           formData={formData}
           errors={errors}
           isSubmitting={isSubmitting}
+          isViewing={isViewing}
           setFormData={setFormData}
           handleCancel={handleCancel}
           handleNext={handleNextFromCreation}
@@ -198,15 +230,18 @@ const CreateTemplatePage: React.FC = () => {
         <div className="space-y-4">
           <DynamicVariablesTab
             dynamicVariables={dynamicVariables}
+            isViewing={isViewing}
             onAddVariable={handleAddVariable}
             onRemoveVariable={handleRemoveVariable}
             onChangeVariable={handleVariableChange}
           />
-          <div className="flex justify-end">
-            <Button onClick={handleNextFromVariables} variant="primary">
-              Next
-            </Button>
-          </div>
+          {!isViewing && (
+            <div className="flex justify-end">
+              <Button onClick={handleNextFromVariables} variant="primary">
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       ),
     },
@@ -217,7 +252,7 @@ const CreateTemplatePage: React.FC = () => {
         : isEmailTemplate
         ? 'Email Template Design'
         : 'Push/SMS Template Design',
-      content: <TemplateDesignStep isEmailTemplate={isEmailTemplate} />,
+      content: <TemplateDesignStep isEmailTemplate={isEmailTemplate} isViewing={isViewing} />,
     },
   ];
 
@@ -239,25 +274,29 @@ const CreateTemplatePage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary-700 dark:text-white">
-            {formData.messageName
+            {isViewing 
+              ? `View Template: ${formData.messageName || 'Template'}`
+              : formData.messageName
               ? formData.messageName
               : 'Create New Template'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {activeTab === 'creation'
+            {isViewing
+              ? 'Read-only view of template configuration'
+              : activeTab === 'creation'
               ? 'Set up template metadata'
               : 'Design your template layout'}
           </p>
         </div>
         <div className="flex flex-wrap gap-3 ml-4">
-          {(hasPermission('create') || hasPermission('update')) && (
+          {!isViewing && (hasPermission('create') || hasPermission('update')) && (
             <Button variant="primary" onClick={handleSaveTemplate}>
               <Save className="h-4 w-4 mr-2" />
               Save as Draft
             </Button>
           )}
 
-          {activeTab === 'design' && (
+          {!isViewing && activeTab === 'design' && (
             <>
               <Button variant="outline">
                 <Eye className="h-4 w-4 mr-2" />
@@ -271,19 +310,20 @@ const CreateTemplatePage: React.FC = () => {
                 <Download className="h-4 w-4 mr-2" />
                 Download Format Requirements
               </Button>
-              <Button variant="outline" onClick={() => navigate('/dashboard')}>
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </Button>
             </>
           )}
+          
+          <Button variant="outline" onClick={() => navigate('/dashboard')}>
+            <X className="h-4 w-4 mr-2" />
+            {isViewing ? 'Close' : 'Cancel'}
+          </Button>
         </div>
       </div>
       <Tabs
         tabs={filteredTabs}
         activeTab={activeTab}
         onTabChange={(id) => {
-          if (enabledTabs.includes(id)) setActiveTab(id);
+          if (isViewing || enabledTabs.includes(id)) setActiveTab(id);
         }}
       />
     </div>

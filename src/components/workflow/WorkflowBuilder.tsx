@@ -12,19 +12,23 @@ import ReactFlow, {
   NodeTypes,
   EdgeTypes,
   MarkerType,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import StageNode from './StageNode';
-import ApprovalEdge from './ApprovalEdge';
-import { Save, Play, RotateCcw } from 'lucide-react';
+import CustomNode from './CustomNode';
+import RoleEdge from './RoleEdge';
+import { useGetNodesQuery, useCreateNodeMutation, useGetRolesQuery, useGetActivitiesQuery, useCreateActivityMutation } from '../../services/api';
+import { Save, Plus, Undo, Trash2 } from 'lucide-react';
 import Button from '../ui/Button';
+import InputField from '../ui/InputField';
+import Dropdown from '../ui/Dropdown';
 
 const nodeTypes: NodeTypes = {
-  stage: StageNode,
+  custom: CustomNode,
 };
 
 const edgeTypes: EdgeTypes = {
-  approval: ApprovalEdge,
+  role: RoleEdge,
 };
 
 interface WorkflowBuilderProps {
@@ -34,141 +38,153 @@ interface WorkflowBuilderProps {
   readOnly?: boolean;
 }
 
-const defaultNodes: Node[] = [
-  {
-    id: 'dev',
-    type: 'stage',
-    position: { x: 100, y: 100 },
-    data: { 
-      label: 'DEV', 
-      stage: 'development',
-      status: 'pending',
-      description: 'Development Environment'
-    },
-  },
-  {
-    id: 'qa',
-    type: 'stage',
-    position: { x: 400, y: 100 },
-    data: { 
-      label: 'QA', 
-      stage: 'testing',
-      status: 'pending',
-      description: 'Quality Assurance Environment'
-    },
-  },
-  {
-    id: 'stage',
-    type: 'stage',
-    position: { x: 700, y: 100 },
-    data: { 
-      label: 'STAGE', 
-      stage: 'staging',
-      status: 'pending',
-      description: 'Staging Environment'
-    },
-  },
-  {
-    id: 'prod',
-    type: 'stage',
-    position: { x: 1000, y: 100 },
-    data: { 
-      label: 'PROD', 
-      stage: 'production',
-      status: 'pending',
-      description: 'Production Environment'
-    },
-  },
-];
-
-const defaultEdges: Edge[] = [
-  {
-    id: 'dev-qa',
-    source: 'dev',
-    target: 'qa',
-    type: 'approval',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      approver: 'dev-lead@company.com',
-      status: 'pending',
-      approvalRequired: true,
-    },
-  },
-  {
-    id: 'qa-stage',
-    source: 'qa',
-    target: 'stage',
-    type: 'approval',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      approver: 'qa-lead@company.com',
-      status: 'pending',
-      approvalRequired: true,
-    },
-  },
-  {
-    id: 'stage-prod',
-    source: 'stage',
-    target: 'prod',
-    type: 'approval',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      approver: 'prod-manager@company.com',
-      status: 'pending',
-      approvalRequired: true,
-    },
-  },
-];
-
 const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
   initialWorkflow,
   onSave,
   onExecute,
   readOnly = false,
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  const reactFlowInstance = useReactFlow();
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [workflowName, setWorkflowName] = useState('');
   const [workflowDescription, setWorkflowDescription] = useState('');
+  const [history, setHistory] = useState<{ nodes: Node[]; edges: Edge[] }[]>([]);
+  
+  // Backend data
+  const { data: backendNodes = [], refetch: refetchNodes } = useGetNodesQuery();
+  const { data: roles = [] } = useGetRolesQuery();
+  
+  // UI State
+  const [showRolePopup, setShowRolePopup] = useState(false);
+  const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
 
-  // Load initial workflow if provided
   useEffect(() => {
     if (initialWorkflow) {
-      setWorkflowName(initialWorkflow.name || '');
-      setWorkflowDescription(initialWorkflow.description || '');
+      if (initialWorkflow.name) {
+        setWorkflowName(initialWorkflow.name);
+      }
+      if (initialWorkflow.description) {
+        setWorkflowDescription(initialWorkflow.description);
+      }
       if (initialWorkflow.flowData) {
-        setNodes(initialWorkflow.flowData.nodes || defaultNodes);
-        setEdges(initialWorkflow.flowData.edges || defaultEdges);
+        setNodes(initialWorkflow.flowData.nodes || []);
+        setEdges(initialWorkflow.flowData.edges || []);
       }
     }
-  }, [initialWorkflow, setNodes, setEdges]);
+  }, [initialWorkflow]);
+
+  const saveToHistory = useCallback(() => {
+    setHistory(prev => [...prev, { nodes: [...nodes], edges: [...edges] }]);
+  }, [nodes, edges]);
 
   const onConnect = useCallback(
     (params: Connection) => {
+      if (readOnly) return;
+      saveToHistory();
       const newEdge = {
         ...params,
-        type: 'approval',
+        id: `edge-${Date.now()}`,
+        type: 'role',
         markerEnd: {
           type: MarkerType.ArrowClosed,
         },
         data: {
-          approver: 'approver@company.com',
+          role: '',
           status: 'pending',
           approvalRequired: true,
         },
       };
       setEdges((eds) => addEdge(newEdge, eds));
     },
-    [setEdges]
+    [readOnly, saveToHistory, setEdges]
   );
 
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    if (readOnly) return;
+    console.log('Edge clicked:', edge);
+    event.stopPropagation();
+    setSelectedEdge(edge);
+    setShowRolePopup(true);
+  }, [readOnly]);
+  
+  const addNodeToCanvas = (nodeData: any) => {
+    if (readOnly) return;
+    
+    saveToHistory();
+    const newNode: Node = {
+      id: `node-${Date.now()}`,
+      type: 'custom',
+      position: { 
+        x: Math.random() * 400 + 100, 
+        y: Math.random() * 300 + 100 
+      },
+      data: {
+        label: nodeData.name,
+        nodeType: nodeData.type,
+        status: 'pending',
+        description: `${nodeData.name} node`,
+      },
+    };
+    setNodes((nds) => [...nds, newNode]);
+  };
+
+  const assignRoleToEdge = (roleId: string) => {
+    if (!selectedEdge) return;
+    
+    const role = roles.find(r => r.id === roleId);
+    if (!role) return;
+
+    console.log('Assigning role to edge:', role.name, selectedEdge.id);
+    setEdges((eds) =>
+      eds.map((edge) =>
+        edge.id === selectedEdge.id
+          ? {
+              ...edge,
+              data: {
+                ...edge.data,
+                role: role.name,
+                roleId: roleId,
+              },
+            }
+          : edge
+      )
+    );
+    
+    setShowRolePopup(false);
+    setSelectedEdge(null);
+  };
+
+  const deleteNode = (nodeId: string) => {
+    if (readOnly) return;
+    
+    saveToHistory();
+    setNodes((nds) => nds.filter(n => n.id !== nodeId));
+    setEdges((eds) => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+  };
+
+  const deleteEdge = (edgeId: string) => {
+    if (readOnly) return;
+    
+    saveToHistory();
+    setEdges((eds) => eds.filter(e => e.id !== edgeId));
+  };
+
+  const undo = () => {
+    if (history.length === 0) return;
+    
+    const lastState = history[history.length - 1];
+    setNodes(lastState.nodes);
+    setEdges(lastState.edges);
+    setHistory(prev => prev.slice(0, -1));
+  };
+
   const handleSave = () => {
+    if (!workflowName.trim()) {
+      alert('Please enter a workflow name');
+      return;
+    }
+
     const workflowData = {
       name: workflowName,
       description: workflowDescription,
@@ -176,127 +192,66 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
         nodes,
         edges,
       },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
+    console.log('Saving workflow:', workflowData);
     onSave(workflowData);
   };
 
-  const handleExecute = () => {
-    if (onExecute) {
-      const workflowData = {
-        name: workflowName,
-        description: workflowDescription,
-        flowData: {
-          nodes,
-          edges,
-        },
-      };
-      onExecute(workflowData);
-    }
-  };
-
-  const handleReset = () => {
-    setNodes(defaultNodes);
-    setEdges(defaultEdges);
-    setWorkflowName('');
-    setWorkflowDescription('');
-  };
-
-  const addStageNode = (stageType: string) => {
-    const newNode: Node = {
-      id: `${stageType}-${Date.now()}`,
-      type: 'stage',
-      position: { x: Math.random() * 500 + 100, y: Math.random() * 300 + 100 },
-      data: {
-        label: stageType.toUpperCase(),
-        stage: stageType.toLowerCase(),
-        status: 'pending',
-        description: `${stageType} Environment`,
-      },
-    };
-    setNodes((nds) => [...nds, newNode]);
+  const closeRolePopup = () => {
+    setShowRolePopup(false);
+    setSelectedEdge(null);
   };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Workflow Info */}
+      {/* Workflow Info & Controls */}
       {!readOnly && (
         <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="Workflow Name"
+            <InputField
+              label="Workflow Name"
               value={workflowName}
-              onChange={(e) => setWorkflowName(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 dark:text-white"
+              onChange={setWorkflowName}
+              placeholder="Enter workflow name"
             />
-            <input
-              type="text"
-              placeholder="Workflow Description"
+            <InputField
+              label="Description"
               value={workflowDescription}
-              onChange={(e) => setWorkflowDescription(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 dark:text-white"
+              onChange={setWorkflowDescription}
+              placeholder="Enter workflow description"
             />
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addStageNode('dev')}
-                className="border-primary-300 text-primary-600 hover:bg-primary-50"
-              >
-                + DEV
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addStageNode('qa')}
-                className="border-primary-300 text-primary-600 hover:bg-primary-50"
-              >
-                + QA
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addStageNode('stage')}
-                className="border-primary-300 text-primary-600 hover:bg-primary-50"
-              >
-                + STAGE
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addStageNode('prod')}
-                className="border-primary-300 text-primary-600 hover:bg-primary-50"
-              >
-                + PROD
-              </Button>
+            <div className="flex space-x-4">
+              {/* Nodes Section */}
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900 dark:text-white">Available Nodes</h4>
+                <div className="flex flex-wrap gap-2 max-w-md">
+                  {backendNodes.map((node) => (
+                    <button
+                      key={node.id}
+                      onClick={() => addNodeToCanvas(node)}
+                      className="px-3 py-2 text-sm bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                    >
+                      {node.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             
             <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleReset}
+                onClick={undo}
+                disabled={history.length === 0}
                 className="border-gray-300 text-gray-600 hover:bg-gray-50"
               >
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Reset
+                <Undo className="h-4 w-4 mr-1" />
+                Undo
               </Button>
-              {onExecute && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleExecute}
-                  className="bg-accent-600 hover:bg-accent-700 text-white"
-                >
-                  <Play className="h-4 w-4 mr-1" />
-                  Execute
-                </Button>
-              )}
               <Button
                 variant="primary"
                 size="sm"
@@ -319,6 +274,7 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
@@ -326,6 +282,21 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
           nodesDraggable={!readOnly}
           nodesConnectable={!readOnly}
           elementsSelectable={!readOnly}
+          selectNodesOnDrag={false}
+          onNodeContextMenu={(event, node) => {
+            if (readOnly) return;
+            event.preventDefault();
+            if (confirm(`Delete node "${node.data.label}"?`)) {
+              deleteNode(node.id);
+            }
+          }}
+          onEdgeContextMenu={(event, edge) => {
+            if (readOnly) return;
+            event.preventDefault();
+            if (confirm(`Delete connection?`)) {
+              deleteEdge(edge.id);
+            }
+          }}
         >
           <Background />
           <Controls />
@@ -333,14 +304,67 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
             nodeColor={(node) => {
               switch (node.data?.status) {
                 case 'completed': return '#10b981';
-                case 'running': return '#f59e0b';
-                case 'failed': return '#ef4444';
+                case 'in_progress': return '#f59e0b';
+                case 'rejected': return '#ef4444';
                 default: return '#6b7280';
               }
             }}
           />
         </ReactFlow>
       </div>
+
+      {/* Role Assignment Popup */}
+      {showRolePopup && selectedEdge && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={closeRolePopup}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Assign Role to Connection
+            </h3>
+            
+            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Assigning role for connection between nodes
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Edge ID: {selectedEdge.id}
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              {roles.map((role) => (
+                <button
+                  key={role.id}
+                  onClick={() => assignRoleToEdge(role.id)}
+                  className="w-full p-3 text-left border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {role.name}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {role.description}
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={closeRolePopup}
+                className="flex-1 border-primary-300 text-primary-600 hover:bg-primary-50"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
