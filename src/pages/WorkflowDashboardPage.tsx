@@ -7,6 +7,8 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Plus, GitBranch, Activity, CheckCircle, Clock, XCircle } from 'lucide-react';
 import ApprovalsPage from './ApprovalsPage';
+import { usePageInfo } from '../hooks/usePageInfo';
+
 
 // Define types for clarity
 interface WorkflowSummary {
@@ -37,6 +39,7 @@ interface PendingApproval {
 const WorkflowDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
+  usePageInfo('Workflow Dashboard', 'Overview of workflows, executions, and pending approvals');
 
   const {
     workflows,

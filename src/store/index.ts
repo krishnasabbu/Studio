@@ -6,6 +6,7 @@ import templatesSlice from './slices/templatesSlice';
 import testsSlice from './slices/testsSlice';
 import rbacSlice from './slices/rbacSlice';
 import emailEditorSlice from './slices/emailEditorSlice';
+import uiSlice from './slices/uiSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     tests: testsSlice,
     rbac: rbacSlice,
     emailEditor: emailEditorSlice,
+    ui: uiSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),

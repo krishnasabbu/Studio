@@ -293,3 +293,7 @@
   transform: rotate(0deg);
   transition: transform 200ms ease-in-out;
 }
+
+.flow-height {
+  height: 80vh;
+}
