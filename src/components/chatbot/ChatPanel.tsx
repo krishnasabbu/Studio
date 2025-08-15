@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Maximize2, Menu, ChevronDown, Sun, Moon } from 'lucide-react';
+import { X, Maximize2, Menu, ChevronDown, Sun, Moon, Trash2 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import NavigationPanel from './NavigationPanel';
@@ -22,6 +22,7 @@ interface ChatPanelProps {
   chatSessions: any[];
   currentChatId?: string;
   onSelectChat: (chatId: string) => void;
+  onClearChat: () => void; // Added new prop
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -37,7 +38,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   onNewChat,
   chatSessions,
   currentChatId,
-  onSelectChat
+  onSelectChat,
+  onClearChat // Destructure the new prop
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -278,6 +280,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                     chatSessions={chatSessions}
                     currentChatId={currentChatId}
                     onSelectChat={onSelectChat}
+                    onClearChat={onClearChat}
                   />
                 </div>
 
@@ -295,7 +298,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 {/* Center Chat Area */}
                 <div className="flex-1 flex flex-col">
                   {/* Header */}
-                  <div className="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#212121] w-full">
+                  <div className="flex items-center p-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-[#212121] w-full">
                     <button
                       onClick={toggleNavigation}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 mr-3"
@@ -318,6 +321,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
                     {/* Controls */}
                     <div className="flex items-center space-x-2 flex-shrink-0">
+                      {messages.length > 0 && (
+                        <button
+                          onClick={onClearChat}
+                          className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
+                          aria-label="Clear current chat"
+                        >
+                          <Trash2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                      )}
                       <button
                         onClick={handleThemeToggle}
                         className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
@@ -381,8 +393,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                         exit={{ opacity: 0, y: 10 }}
                         onClick={scrollToBottom}
                         className="absolute bottom-14 right-6 bg-white dark:bg-gray-800 
-                                  shadow-lg hover:shadow-xl rounded-full p-2 border border-gray-200 dark:border-gray-600
-                                  hover:scale-105 transition-all duration-200 z-20"
+                                     shadow-lg hover:shadow-xl rounded-full p-2 border border-gray-200 dark:border-gray-600
+                                     hover:scale-105 transition-all duration-200 z-20"
                         aria-label="Scroll to latest messages"
                       >
                         <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -391,9 +403,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                   </div>
 
                   {/* Input */}
-                  <div className="bg-white dark:bg-[#f7f8fc] border-gray-200 dark:border-gray-700">
+                  <div className="border-gray-200 dark:border-gray-700">
                     <div className="max-w-4xl mx-auto">
-                      <ChatInput onSendMessage={onSendMessage} />
+                      <ChatInput onSendMessage={onSendMessage} onClearChat={onClearChat} />
                     </div>
                   </div>
                 </div>
@@ -431,6 +443,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                   <div className="flex-1"></div>
 
                   <div className="flex items-center space-x-2 flex-shrink-0">
+                    {messages.length > 0 && (
+                      <button
+                        onClick={onClearChat}
+                        className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Clear current chat"
+                      >
+                        <Trash2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                      </button>
+                    )}
                     <button
                       onClick={handleThemeToggle}
                       className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
@@ -499,8 +520,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 </div>
 
                 {/* Input */}
-                <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                  <ChatInput onSendMessage={onSendMessage} />
+                <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <ChatInput onSendMessage={onSendMessage} onClearChat={onClearChat} />
                 </div>
               </>
             )}

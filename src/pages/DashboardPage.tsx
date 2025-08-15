@@ -180,7 +180,7 @@ const DashboardPage: React.FC = () => {
           {paginatedTemplates.map((template) => (
             <Card 
               key={template.id} 
-              className="p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50 border-l-4 border-l-primary-500"
+              className="p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white hover:bg-gradient-to-br hover:to-gray-50 border-l-4 border-l-primary-500"
               onClick={() => handleTemplateClick(template)}
             >
               <div className="flex items-start justify-between mb-4">

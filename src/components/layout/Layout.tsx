@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-background-light to-background-cream">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br to-background-cream">
           {children}
         </main>
       </div>

@@ -173,6 +173,20 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
     setIsNavOpen(prev => !prev);
   }, []);
 
+  const handleClearChat = useCallback(() => {
+    try {
+      if (!currentChatId) return;
+
+      // Clear messages for current chat ID
+      updateMessages(() => []);
+
+      
+    } catch (error) {
+      // Silently handle clear chat errors
+      // Optionally console.error(error);
+    }
+  }, [currentChatId, updateMessages]);
+
   const handleNewChat = useCallback(() => {
     try {
       // Save current chat session if it has messages beyond greeting
@@ -301,6 +315,7 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
         onToggleMaximize={toggleMaximize}
         messages={messages}
         onSendMessage={handleSendMessage}
+        onClearChat={handleClearChat}
         panelState={panelState}
         isNavOpen={isNavOpen}
         toggleNavigation={toggleNavigation}

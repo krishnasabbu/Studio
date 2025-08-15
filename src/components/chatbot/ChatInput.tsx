@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // ChatInput.tsx
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Send, Mic, MicOff, Plus, X, Code, Camera, MapPin, Calendar, Paperclip } from 'lucide-react';
@@ -8,6 +9,7 @@ import { FileAttachment, VoiceRecognitionState, Intent } from './types';
 
 interface ChatInputProps {
   onSendMessage: (message: string, attachments?: FileAttachment[], intent?: Intent) => void;
+  onClearChat: () => void;
   disabled?: boolean;
 }
 
@@ -66,7 +68,7 @@ const AVAILABLE_INTENTS: Intent[] = [
   }
 ];
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false, onClearChat }) => {
   const [message, setMessage] = useState('');
   const [selectedIntent, setSelectedIntent] = useState<Intent | null>(null);
   const [showIntentPopup, setShowIntentPopup] = useState(false);
@@ -167,8 +169,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
     setSelectedIntent(intent);
     setShowIntentPopup(false);
     textareaRef.current?.focus();
+    onClearChat();
     onSendMessage('', [], intent);
-  }, [onSendMessage]);
+  }, [onSendMessage, onClearChat]);
 
   const handleIntentDeselect = useCallback(() => {
     if (voiceState.isListening) recognitionRef.current?.stop();
@@ -266,7 +269,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
         )}
       </AnimatePresence>
 
-      <div className="p-4 bg-white dark:bg-gray-800">
+      <div className="p-6">
         {/* Error Banner */}
         {voiceState.error && (
           <div className="mb-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-lg text-sm text-red-600 dark:text-red-300">
