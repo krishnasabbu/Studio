@@ -265,6 +265,18 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
           // Use functional updater to avoid stale `messages`
           updateMessages(prev => [...(prev ?? []), userMessage]);
 
+          // 1. Add a temporary loading message for the bot
+          const tempBotLoadingMessage: Message = {
+            id: 'bot-loading-' + Date.now(),
+            content: '', // No content yet
+            sender: 'bot',
+            timestamp: new Date(),
+            isTyping: true, // Special flag to render a loading animation
+          };
+
+          // Add the temporary message to the chat
+          updateMessages(prev => [...(prev ?? []), tempBotLoadingMessage]);
+
           // Simulate bot response after a delay
           setTimeout(() => {
             try {
@@ -281,19 +293,18 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
 
               responseContent += 'How can I help you further?';
 
-              const botResponse: Message = {
-                id: 'bot-' + Date.now(),
-                content: responseContent,
-                sender: 'bot',
-                timestamp: new Date()
-              };
-
-              updateMessages(prev => [...(prev ?? []), botResponse]);
+              updateMessages(prev =>
+                prev.map(msg =>
+                  msg.id === tempBotLoadingMessage.id
+                    ? { ...msg, content: responseContent, isTyping: false } // Update content and remove the flag
+                    : msg
+                )
+              );
             } catch (error) {
               // Silently handle bot response errors
               // Optionally console.error(error);
             }
-          }, 1000);
+          }, 10000);
         }
         
       } catch (error) {

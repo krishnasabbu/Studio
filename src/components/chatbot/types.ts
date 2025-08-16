@@ -5,6 +5,7 @@ export interface Message {
   timestamp: Date;
   type?: 'text' | 'action-buttons';
   attachments?: FileAttachment[];
+  isTyping?: boolean; // Add this line
 }
 
 export interface FileAttachment {
