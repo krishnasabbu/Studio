@@ -236,84 +236,141 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
   }, [chatSessions, selectChat, updateMessages]);
 
   const handleSendMessage = useCallback(
-    (content: string, attachments?: FileAttachment[], intent?: Intent) => {
-      //if (!content.trim() && (!attachments || attachments.length === 0)) return;
+  (content: string, attachments?: FileAttachment[], intent?: Intent) => {
+    try {
+      if (!content && (!attachments || attachments.length === 0)) return;
 
-      try {
-        if(!content) {
-          if(intent && intent?.initialResposne != '') {
-              const botResponse: Message = {
-                id: 'bot-' + Date.now(),
-                content: intent?.initialResposne,
-                sender: 'bot',
-                timestamp: new Date()
-              };
-              updateMessages(prev => [...(prev ?? []), botResponse]);
-          }else {
-            return;
-          }
-        }else {
-            // Add user message
-          const userMessage: Message = {
-            id: 'user-' + Date.now(),
-            content: content || '📎 File attachment',
-            sender: 'user',
-            timestamp: new Date(),
-            attachments: attachments
-          };
+      // If intent has initial response, show it immediately
+      if (intent && intent.initialResponse) {
+        const botResponse: Message = {
+          id: 'bot-' + Date.now(),
+          content: intent.initialResponse,
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        updateMessages((prev) => [...(prev ?? []), botResponse]);
+      }
 
-          // Use functional updater to avoid stale `messages`
-          updateMessages(prev => [...(prev ?? []), userMessage]);
+      // Add user message (if any content or attachments)
+      if (content) {
+        const userMessage: Message = {
+          id: 'user-' + Date.now(),
+          content: content || '📎 File attachment',
+          sender: 'user',
+          timestamp: new Date(),
+          attachments,
+        };
+        updateMessages((prev) => [...(prev ?? []), userMessage]);
+      }
 
-          // 1. Add a temporary loading message for the bot
-          const tempBotLoadingMessage: Message = {
-            id: 'bot-loading-' + Date.now(),
-            content: '', // No content yet
-            sender: 'bot',
-            timestamp: new Date(),
-            isTyping: true, // Special flag to render a loading animation
-          };
+      // === Add temporary loading message for bot ===
+      const tempBotLoadingMessage: Message = {
+        id: 'bot-loading-' + Date.now(),
+        content: '',
+        sender: 'bot',
+        timestamp: new Date(),
+        isTyping: true,
+      };
 
-          // Add the temporary message to the chat
-          updateMessages(prev => [...(prev ?? []), tempBotLoadingMessage]);
+      updateMessages((prev) => [...(prev ?? []), tempBotLoadingMessage]);
 
-          // Simulate bot response after a delay
-          setTimeout(() => {
-            try {
-              // Determine response based on intent
-              let responseContent = `Thanks for your message! ${
-                attachments && attachments.length > 0 ? `I can see you've shared ${attachments.length} file(s). ` : ''
-              }`;
+      // === Start streaming from FastAPI backend ===
+      const abortController = new AbortController();
 
-              if (intent) {
-                responseContent += `I see you're using the **${intent.name}** feature. `;
-                // In production, this would call the specific API endpoint: intent.endpoint
-                console.log(`Would call API endpoint: ${intent.endpoint}`);
+      fetch('http://localhost:8000/chat-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content || '' }),
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (!response.body) return;
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          // Read stream chunk by chunk
+          function read() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                // Mark loading message as complete
+                updateMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === tempBotLoadingMessage.id
+                      ? { ...msg, isTyping: false }
+                      : msg
+                  )
+                );
+                return;
               }
 
-              responseContent += 'How can I help you further?';
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop(); // Keep incomplete line
 
-              updateMessages(prev =>
-                prev.map(msg =>
-                  msg.id === tempBotLoadingMessage.id
-                    ? { ...msg, content: responseContent, isTyping: false } // Update content and remove the flag
-                    : msg
-                )
-              );
-            } catch (error) {
-              // Silently handle bot response errors
-              // Optionally console.error(error);
-            }
-          }, 10000);
-        }
-        
-      } catch (error) {
-        // Silently handle message sending errors
-        // Optionally console.error(error);
-      }
-    },
-    [updateMessages]
-  );
+              lines.forEach((line) => {
+                if (line.trim()) {
+                  try {
+                    const step = JSON.parse(line);
+
+                    // Update the loading message's content incrementally
+                    updateMessages((prev) =>
+                      prev.map((msg) => {
+                        if (msg.id === tempBotLoadingMessage.id) {
+                          const newContent = msg.content
+                            ? `${msg.content}\n${step.message || ''}`
+                            : step.message || '';
+
+                          return {
+                            ...msg,
+                            content: newContent,
+                          };
+                        }
+                        return msg;
+                      })
+                    );
+                  } catch (err) {
+                    console.warn('Failed to parse JSON:', err);
+                  }
+                }
+              });
+
+              read(); // Continue reading
+            });
+          }
+
+          read();
+        })
+        .catch((err) => {
+          if (err.name === 'AbortError') {
+            console.log('Fetch aborted');
+          } else {
+            // Show error in the bot message
+            updateMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === tempBotLoadingMessage.id
+                  ? {
+                      ...msg,
+                      content: `❌ Sorry, I couldn't process your request: ${err.message}`,
+                      isTyping: false,
+                    }
+                  : msg
+              )
+            );
+          }
+        });
+
+      // === Cleanup: abort request if component unmounts or new message sent ===
+      return () => {
+        abortController.abort();
+      };
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error);
+    }
+  },
+  [updateMessages]
+);
 
   return (
     <div className={`chatbot-container ${className}`}>
@@ -352,3 +409,4 @@ This demonstrates **code syntax highlighting** and **Mermaid diagram rendering**
 };
 
 export default Chatbot;
+
