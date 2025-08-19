@@ -29,6 +29,11 @@ import WorkflowDemoPage from './pages/WorkflowDemoPage';
 import TaskManagementPage from './pages/TaskManagementPage';
 import TaskCreatePage from './pages/TaskCreatePage';
 import { ToastProvider } from './context/ToastContext';
+import MessageSpecForm from './pages/MessageSpecForm';
+import ImpactAssessmentDashboard from './pages/ImpactAssessmentDashboard';
+import ImpactAssessmentForm from './pages/ImpactAssessmentForm';
+import ReleaseTeamsPage from './pages/ReleaseTeamsPage';
+import MessageSpecDashboard from './pages/MessageSpecDashboard';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated } = useAppSelector(state => state.auth);
@@ -118,6 +123,96 @@ const AppContent: React.FC = () => {
               <ProtectedRoute>
                 <Layout>
                   <AlertOnboardPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/message-specs"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MessageSpecDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/message-specs/create"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MessageSpecForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/message-specs/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MessageSpecForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/message-specs/:id/edit"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MessageSpecForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impact-assessments"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ImpactAssessmentDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impact-assessments/create"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ImpactAssessmentForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impact-assessments/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ImpactAssessmentForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impact-assessments/:id/edit"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ImpactAssessmentForm />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impact-assessments/release/:releaseId/teams"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReleaseTeamsPage />
                 </Layout>
               </ProtectedRoute>
             }
