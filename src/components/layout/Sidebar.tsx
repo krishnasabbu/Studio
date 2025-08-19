@@ -45,6 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     { path: '/rbac/users', label: 'RBAC > Users', icon: Users, permission: 'read' },
     { path: '/rbac/roles', label: 'RBAC > Roles', icon: Shield, permission: 'read' },
     { path: '/rbac/permissions', label: 'RBAC > Permissions', icon: Key, permission: 'read' },
+    { path: '/message-specs', label: 'Message Spec', icon: MessageSquare, permission: 'read' },
+    { path: '/impact-assessments', label: 'Impact Assessments', icon: FileText, permission: 'read' },
   ];
 
   const filteredNavItems = navItems.filter(item => hasPermission(item.permission));
