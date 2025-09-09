@@ -1,0 +1,326 @@
+import React, { useState } from 'react';
+import Button from '../components/ui/Button';
+import Tabs from '../components/ui/Tabs';
+import { useAppSelector } from '../hooks/useRedux';
+import { Download } from 'lucide-react';
+import OnboardTab from './OnboardTab';
+import TemplateMappingTab from './TemplateMappingTab';
+import FeaturesMappingTab from './FeaturesMappingTab';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import { useGetTemplatesQuery, useGetJiraDataQuery, useCreateAlertMutation, useUpdateAlertMutation, useGetAlertQuery, useGetWorkflowsQuery } from '../services/api';
+import Dropdown from '../components/ui/Dropdown';
+import Card from '../components/ui/Card';
+
+const AlertOnboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { id: paramId } = useParams<{ id: string }>();
+  const isViewMode = Boolean(paramId) && window.location.pathname.includes('/view/');
+  const alertId = searchParams.get('id');
+  const finalAlertId = paramId || alertId;
+  const isEditing = Boolean(finalAlertId) && !isViewMode;
+  const isViewing = Boolean(finalAlertId) && isViewMode;
+  
+  const { data: templates = [], isLoading: isLoadingTemplates } = useGetTemplatesQuery();
+  const { data: existingAlert, isLoading: isLoadingAlert } = useGetAlertQuery(finalAlertId!, {
+    skip: !finalAlertId,
+  });
+  const { data: workflows = [] } = useGetWorkflowsQuery();
+  const [createAlert, { isLoading: isCreatingAlert }] = useCreateAlertMutation();
+  const [updateAlert, { isLoading: isUpdatingAlert }] = useUpdateAlertMutation();
+  
+  const [activeTab, setActiveTab] = useState('onboard');
+  
+  // Alert name
+  const [alertName, setAlertName] = useState('');
+  
+  // Workflow assignment
+  const [selectedWorkflow, setSelectedWorkflow] = useState('');
+  
+  // Onboard tab state
+  const [jiraId, setJiraId] = useState('');
+  const [isLoadingJira, setIsLoadingJira] = useState(false);
+  const [onboardFields, setOnboardFields] = useState({
+    field1: '',
+    field2: '',
+    field3: '',
+    field4: '',
+    field5: '',
+    field6: '',
+    field7: '',
+    field8: '',
+    field9: '',
+    field10: '',
+  });
+
+  // Template Mapping state
+  const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
+
+  // Features Mapping state
+  const [availableFeatures] = useState([
+    'Email Notifications',
+    'Push Notifications',
+    'SMS Alerts',
+    'In-App Messages',
+    'Webhook Integration',
+    'Scheduled Delivery',
+    'A/B Testing',
+    'Analytics Tracking',
+    'Multi-language Support',
+    'Template Versioning',
+    'Dynamic Content',
+    'Personalization',
+  ]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+
+  // Load existing alert data when editing
+  React.useEffect(() => {
+    if (existingAlert) {
+      setSelectedWorkflow(existingAlert.assignedWorkflow || '');
+      setAlertName(existingAlert.name || '');
+      setJiraId(existingAlert.jiraId || '');
+      setOnboardFields(existingAlert.fields || {
+        field1: '', field2: '', field3: '', field4: '', field5: '',
+        field6: '', field7: '', field8: '', field9: '', field10: '',
+      });
+      setSelectedTemplates(existingAlert.selectedTemplates || []);
+      setSelectedFeatures(existingAlert.selectedFeatures || []);
+    }
+  }, [existingAlert]);
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleAlertNameChange = React.useCallback((value: string) => {
+    setAlertName(value);
+  }, []);
+
+  const handleJiraIdChange = React.useCallback((value: string) => {
+    setJiraId(value);
+  }, []);
+
+  const handleOnboardFieldChange = React.useCallback((field: string, value: string) => {
+    setOnboardFields(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const workflowOptions = workflows.map(workflow => ({
+    value: workflow.id,
+    label: workflow.name,
+  }));
+  const tabOrder = ['onboard', 'template-mapping', 'features-mapping'];
+  const currentTabIndex = tabOrder.indexOf(activeTab);
+
+  const handleNext = () => {
+    if (currentTabIndex < tabOrder.length - 1) {
+      setActiveTab(tabOrder[currentTabIndex + 1]);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(tabOrder[currentTabIndex - 1]);
+    }
+  };
+  const handleLoadJira = async () => {
+    if (!jiraId.trim()) return;
+    
+    setIsLoadingJira(true);
+    try {
+      const response = await fetch(`http://localhost:3001/jiraData?jiraId=${jiraId.trim()}`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        setOnboardFields(data[0].data);
+      } else {
+        // Fallback to mock data if JIRA ID not found
+        setOnboardFields({
+          field1: 'Alert Type: Security',
+          field2: 'Priority: High',
+          field3: 'Category: Authentication',
+          field4: 'Severity: Critical',
+          field5: 'Department: IT Security',
+          field6: 'Escalation Level: 2',
+          field7: 'Response Time: 15 minutes',
+          field8: 'Notification Frequency: Immediate',
+          field9: 'Target Audience: All Users',
+          field10: 'Compliance Required: Yes',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load JIRA data:', error);
+      alert('Failed to load JIRA data. Please try again.');
+    } finally {
+      setIsLoadingJira(false);
+    }
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplates(prev => 
+      prev.includes(templateId) 
+        ? prev.filter(id => id !== templateId)
+        : [...prev, templateId]
+    );
+  };
+
+  const handleOnboard = async () => {
+    try {
+      const alertData = {
+        ...(isEditing && { id: alertId }),
+        name: alertName,
+        jiraId,
+        status: 'Draft',
+        fields: onboardFields,
+        selectedTemplates,
+        selectedFeatures,
+        assignedWorkflow: selectedWorkflow,
+      };
+      
+      if (isEditing) {
+        await updateAlert({ ...alertData, id: finalAlertId }).unwrap();
+      } else {
+        await createAlert(alertData).unwrap();
+      }
+
+      alert(isEditing ? 'Alert updated successfully!' : 'Alert onboarded successfully!');
+      
+      console.log('Alert Data:', JSON.stringify(alertData, null, 2));
+      
+      // Reset form
+      setAlertName('');
+      setJiraId('');
+      setOnboardFields({
+        field1: '', field2: '', field3: '', field4: '', field5: '',
+        field6: '', field7: '', field8: '', field9: '', field10: '',
+      });
+      setSelectedTemplates([]);
+      setSelectedFeatures([]);
+      setSelectedWorkflow('');
+      setActiveTab('onboard');
+      navigate('/alerts-dashboard');
+    } catch (error) {
+      console.error('Failed to create onboard:', error);
+      alert('Failed to complete onboard. Please try again.');
+    }
+  };
+
+  const tabs = [
+    { 
+      id: 'onboard', 
+      label: 'Onboard', 
+      content: (
+        <div className="space-y-6">
+          <OnboardTab
+            alertName={alertName}
+            handleAlertNameChange={handleAlertNameChange}
+            isLoadingJira={isLoadingJira}
+            jiraId={jiraId}
+            handleJiraIdChange={handleJiraIdChange}
+            handleLoadJira={handleLoadJira}
+            onboardFields={onboardFields}
+            handleOnboardFieldChange={handleOnboardFieldChange}
+            isViewing={isViewing}
+          />
+          {!isViewing && (
+            <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      )
+    },
+    { 
+      id: 'template-mapping', 
+      label: 'Template Mapping', 
+      content: (
+        <div className="space-y-6">
+          <TemplateMappingTab
+            templates={templates}
+            selectedTemplates={selectedTemplates}
+            handleTemplateSelect={handleTemplateSelect}
+            isViewing={isViewing}
+          />
+          {!isViewing && (
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
+                Back
+              </Button>
+              <Button onClick={handleNext} disabled={currentTabIndex >= tabOrder.length - 1}>
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      )
+    },
+    { 
+      id: 'features-mapping', 
+      label: 'Features Mapping', 
+      content: (
+        <div className="space-y-6">
+          <FeaturesMappingTab
+            allFeatures={availableFeatures}
+            selectedFeatures={selectedFeatures}
+            setSelectedFeatures={setSelectedFeatures}
+            isViewing={isViewing}
+          />
+          
+          <Card className="p-6 bg-white hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
+            <h3 className="text-lg font-semibold text-primary-700 dark:text-white mb-4">
+              Workflow Assignment
+              {isViewing && (
+                <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 rounded-full text-xs font-medium">
+                  Read Only
+                </span>
+              )}
+            </h3>
+            <Dropdown
+              label="Assign Workflow (Optional)"
+              value={selectedWorkflow}
+              onChange={setSelectedWorkflow}
+              options={workflowOptions}
+              placeholder="Select a workflow to assign"
+              disabled={isViewing}
+            />
+          </Card>
+          {!isViewing && (
+            <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button variant="outline" onClick={handleBack} disabled={currentTabIndex <= 0}>
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleOnboard}
+                disabled={isCreatingAlert || isUpdatingAlert}
+              >
+                {isCreatingAlert || isUpdatingAlert ? 'Processing...' : isEditing ? 'Update Alert' : 'Onboard Alert'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {isViewing ? 'View Alert Configuration' : isEditing ? 'Edit Alert Onboard' : 'Alert Onboard'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {isViewing 
+              ? 'View alert configuration details (read-only)'
+              : 'Configure alert onboarding with JIRA integration, template mapping, and feature selection'
+            }
+          </p>
+        </div>
+      </div>
+
+      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+    </div>
+  );
+};
+
+export default AlertOnboardPage;
