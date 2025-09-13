@@ -417,6 +417,36 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/build-validation"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <BuildValidationPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/broadcast-alerts"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <BroadcastAlertsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/build-simulation"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <BuildSimulationPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
